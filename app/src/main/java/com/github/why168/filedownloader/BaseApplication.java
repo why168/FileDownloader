@@ -2,6 +2,7 @@ package com.github.why168.filedownloader;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.AsyncTask;
 
 import com.github.why168.filedownloader.constant.Constants;
 import com.github.why168.filedownloader.db.SQLiteDataBaseDown;
@@ -23,6 +24,7 @@ public class BaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mContext = this;
+
     }
 
 

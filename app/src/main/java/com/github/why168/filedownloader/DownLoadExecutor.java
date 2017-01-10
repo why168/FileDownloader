@@ -9,12 +9,21 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @since JDK1.8
  */
 public class DownLoadExecutor {
-//        private static ThreadPoolExecutor mPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+//        private static ThreadPoolExecutor mPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
 //    private static ExecutorService mPool = Executors.newSingleThreadExecutor();
     private static ThreadPoolExecutor mPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
+//    private static ThreadPoolExecutor mPool = new ThreadPoolExecutor(3, 3,
+//            60L, TimeUnit.SECONDS,
+//            new LinkedBlockingDeque<>());
+
     public static synchronized void execute(Runnable task) {
         mPool.execute(task);
+
+//        Executors.newScheduledThreadPool(3);
+//        Executors.newFixedThreadPool(3);
+//        Executors.newWorkStealingPool();
+
     }
 
 
@@ -22,9 +31,6 @@ public class DownLoadExecutor {
      * 取消线程池中某个还未执行的任务
      */
     public synchronized static boolean cancel(Runnable run) {
-        boolean remove = mPool.getQueue().remove(run);
-        boolean remove1 = mPool.remove(run);
-
 //        if (mPool != null && (!mPool.isShutdown() || mPool.isTerminating())) {
 //            return mPool.getQueue().remove(run) || mPool.remove(run);
 //        } else {

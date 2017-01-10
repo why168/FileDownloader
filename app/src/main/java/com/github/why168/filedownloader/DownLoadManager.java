@@ -19,6 +19,7 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * @author Edwin.Wu
@@ -36,6 +37,7 @@ public class DownLoadManager {
      */
     private ExecuteHandler handler = new ExecuteHandler();
 
+    private LinkedBlockingDeque<DownLoadBean> mWaitingQueue = new LinkedBlockingDeque<>();
 
     /**
      * 拿到主线程Looper
@@ -115,7 +117,7 @@ public class DownLoadManager {
         }
     }
 
-    public void DeleteDownTask(DownLoadBean item) {
+    public void deleteDownTask(DownLoadBean item) {
         //TODO 删除文件，删除数据库
         try {
             item.downloadState = DownLoadState.STATE_DELETE;

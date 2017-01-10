@@ -23,6 +23,13 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+/**
+ * 多任务下载
+ *
+ * @author Edwin.Wu
+ * @version 2016/12/25 15:55
+ * @since JDK1.8
+ */
 public class MainActivity extends AppCompatActivity implements Observer {
     private List<DownLoadBean> loadBeen = new ArrayList<>();
     private LayoutInflater mLayoutInflater;
@@ -39,8 +46,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(viewAdapter = new ViewAdapter());
-
-        DownLoadObservable.getInstance().addObserver(this);
     }
 
     private void initData() {
@@ -101,22 +106,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         loadBeen.add(bean7);
         loadBeen.add(bean8);
 
-//        ArrayList<DownLoadBean> downLoad = DataBaseUtil.getDownLoad();
-//        if (downLoad.size() > 0) {
-//            for (int i = 0; i < downLoad.size(); i++) {
-//                DownLoadBean bean = downLoad.get(i);
-//
-//                for (int j = 0; j < loadBeen.size(); j++) {
-//                    DownLoadBean loadBean = loadBeen.get(i);
-//
-//                    if (bean.id.equals(loadBean.id)) {
-//                        loadBeen.remove(j);
-//                        loadBeen.add(j, bean);
-//                        break;
-//                    }
-//                }
-//            }
-//        }
     }
 
     public String FormetFileSize(long fileSize) {// 转换文件大小
@@ -144,13 +133,15 @@ public class MainActivity extends AppCompatActivity implements Observer {
         int index = loadBeen.indexOf(bean);
         Log.e("Edwin", "index = " + index + " bean = " + bean.toString());
         int downloadState = bean.downloadState;
-        if (index != -1) {
-            if (downloadState == DownLoadState.STATE_DELETE) {
-                loadBeen.remove(index);
-                viewAdapter.notifyItemRemoved(index);
-                if (index != loadBeen.size())
-                    viewAdapter.notifyItemChanged(index, loadBeen.size() - index);
 
+        if (index != -1 && isCurrentListViewItemVisible(index)) {
+            if (downloadState == DownLoadState.STATE_DELETE) {
+                viewAdapter.notifyItemRemoved(index);
+                loadBeen.remove(index);
+//                notifyChange(bean, index);
+                if (index != loadBeen.size())
+//                    viewAdapter.notifyItemChanged(index, loadBeen.size() - index);
+                    notifyChange(bean, index);
                 try {
                     File file = new File(bean.path);
                     boolean delete = file.delete();
@@ -161,130 +152,76 @@ public class MainActivity extends AppCompatActivity implements Observer {
             } else {
                 loadBeen.remove(index);
                 loadBeen.add(index, bean);
-                viewAdapter.notifyItemChanged(index, "index");
+//                viewAdapter.notifyItemChanged(index, "index");
+                notifyChange(bean, index);
             }
         }
 
-//        switch (downloadState) {
-//            case DownLoadState.STATE_NONE:
-//                onStart(bean, index);
-//                break;
-//            case DownLoadState.STATE_WAITING:
-//                onPrepare(bean, index);
-//                break;
-//            case DownLoadState.STATE_DOWNLOADING:
-//                onProgress(bean, index);
-//                break;
-//            case DownLoadState.STATE_PAUSED:
-//                onStop(bean, index);
-//                break;
-//            case DownLoadState.STATE_DOWNLOADED:
-//                onFinish(bean, index);
-//                break;
-//            case DownLoadState.STATE_ERROR:
-//                onError(bean, index);
-//                break;
-//        }
-    }
 
-
-    /**
-     * 准备下载
-     */
-    void onPrepare(DownLoadBean bean, int index) {
-        viewAdapter.notifyItemChanged(index, "index");
     }
 
     /**
-     * 开始下载
+     * 数据改变
+     *
+     * @param bean
+     * @param index
      */
-    void onStart(DownLoadBean bean, int index) {
-    }
+    private void notifyChange(DownLoadBean bean, int index) {
+        ViewHolder holder = getViewHolder(index);
 
-    /**
-     * 下载中
-     */
-    void onProgress(DownLoadBean bean, int index) {
-    }
+        switch (bean.downloadState) {
+            case DownLoadState.STATE_NONE:
+                holder.button_start.setText("点击下载");
+                break;
+            case DownLoadState.STATE_WAITING:
+                //TODO 等待下载 改成 排队下载
+                holder.button_start.setText("排队下载");
+                break;
+            case DownLoadState.STATE_DOWNLOADING:
+                //TODO 下载中 改成 正在下载
+                holder.button_start.setText("正在下载");
+                break;
+            case DownLoadState.STATE_PAUSED:
+                //TODO 暂停下载 换成 继续下载
+                holder.button_start.setText("继续下载");
+                break;
+            case DownLoadState.STATE_DOWNLOADED:
+                holder.button_start.setText("下载完毕");
+                break;
+            case DownLoadState.STATE_ERROR:
+                holder.button_start.setText("下载错误");
+                break;
+            case DownLoadState.STATE_CONNECTION:
+                holder.button_start.setText("连接中");
+                break;
+        }
 
-    /**
-     * 暂停
-     */
-    void onStop(DownLoadBean bean, int index) {
-    }
-
-    /**
-     * 下载完成
-     */
-    void onFinish(DownLoadBean bean, int index) {
-    }
-
-    /**
-     * 下载失败
-     */
-    void onError(DownLoadBean bean, int index) {
-    }
-
-    /**
-     * 删除成功
-     */
-    void onDelete(DownLoadBean bean, int index) {
+        holder.text_progress.setText(FormetFileSize(bean.currentSize) + "/" + FormetFileSize(bean.totalSize));
+        holder.progressBar.setMax((int) bean.totalSize);
+        holder.progressBar.setProgress((int) bean.currentSize);
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStart() {
+        super.onStart();
+        DownLoadObservable.getInstance().addObserver(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
         DownLoadObservable.getInstance().deleteObserver(this);
     }
 
-    /**
-     *
-     */
-    private class ViewAdapter extends RecyclerView.Adapter<ViewHolder2> {
+
+    private class ViewAdapter extends RecyclerView.Adapter<ViewHolder> {
         @Override
-        public ViewHolder2 onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ViewHolder2(mLayoutInflater.inflate(R.layout.item_down, parent, false));
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new ViewHolder(mLayoutInflater.inflate(R.layout.item_down, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder2 holder, int position, List<Object> payloads) {
-            if (!"index".equals(payloads)) {
-                onBindViewHolder(holder, position);
-            } else {
-                DownLoadBean item = loadBeen.get(position);
-                switch (item.downloadState) {
-                    case DownLoadState.STATE_NONE:
-                        holder.button_start.setText("点击下载");
-                        break;
-                    case DownLoadState.STATE_WAITING:
-                        //TODO 等待下载 改成 排队下载
-                        holder.button_start.setText("排队下载");
-                        break;
-                    case DownLoadState.STATE_DOWNLOADING:
-                        //TODO 下载中 改成 正在下载
-                        holder.button_start.setText("正在下载");
-                        break;
-                    case DownLoadState.STATE_PAUSED:
-                        //TODO 暂停下载 换成 继续下载
-                        holder.button_start.setText("继续下载");
-                        break;
-                    case DownLoadState.STATE_DOWNLOADED:
-                        holder.button_start.setText("下载完毕");
-                        break;
-                    case DownLoadState.STATE_ERROR:
-                        holder.button_start.setText("下载错误");
-                        break;
-                    case DownLoadState.STATE_CONNECTION:
-                        holder.button_start.setText("连接中");
-                        break;
-                }
-                holder.progressBar.setMax((int) item.totalSize);
-                holder.progressBar.setProgress((int) item.currentSize);
-            }
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder2 holder, int position) {
+        public void onBindViewHolder(ViewHolder holder, int position) {
             DownLoadBean item = loadBeen.get(position);
             holder.text_name.setText(item.appName);
 
@@ -315,12 +252,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     break;
             }
 
-            holder.button_delete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // 删除下载
-                    DownLoadManager.getInstance().DeleteDownTask(item);
-                }
+            holder.button_delete.setOnClickListener(v -> {
+                // 删除下载
+                DownLoadManager.getInstance().deleteDownTask(item);
             });
 
             holder.button_start.setOnClickListener(v -> {
@@ -340,14 +274,14 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
     }
 
-    static class ViewHolder2 extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         TextView text_name;
         Button button_start;
         Button button_delete;
         TextView text_progress;
         ProgressBar progressBar;
 
-        ViewHolder2(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             text_name = (TextView) itemView.findViewById(R.id.text_name);
             button_start = (Button) itemView.findViewById(R.id.button_start);
@@ -356,4 +290,16 @@ public class MainActivity extends AppCompatActivity implements Observer {
             progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
         }
     }
+
+    private ViewHolder getViewHolder(int position) {
+        return (ViewHolder) recyclerView.findViewHolderForLayoutPosition(position);
+    }
+
+    private boolean isCurrentListViewItemVisible(int position) {
+        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+        int first = layoutManager.findFirstVisibleItemPosition();
+        int last = layoutManager.findLastVisibleItemPosition();
+        return first <= position && position <= last;
+    }
+
 }
