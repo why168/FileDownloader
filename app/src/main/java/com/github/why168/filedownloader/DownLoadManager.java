@@ -1,8 +1,6 @@
 package com.github.why168.filedownloader;
 
-import android.annotation.SuppressLint;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
@@ -21,6 +19,10 @@ import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import static com.github.why168.filedownloader.constant.DownLoadState.STATE_DELETE;
+import static com.github.why168.filedownloader.constant.DownLoadState.STATE_DOWNLOADED;
+
+
 /**
  * @author Edwin.Wu
  * @version 2016/12/28 14:47
@@ -32,28 +34,38 @@ public class DownLoadManager {
      */
     private ConcurrentHashMap<String, DownLoadTask> mTaskMap = new ConcurrentHashMap<String, DownLoadTask>();
 
+    private ConcurrentHashMap<String, DownLoadTask2> mTaskMap2 = new ConcurrentHashMap<String, DownLoadTask2>();
+
     /**
      * 当下载状态发送改变的时候回调
      */
-    private ExecuteHandler handler = new ExecuteHandler();
+//    private ExecuteHandler handler = new ExecuteHandler();
 
-    private LinkedBlockingDeque<DownLoadBean> mWaitingQueue = new LinkedBlockingDeque<>();
-
-    /**
-     * 拿到主线程Looper
-     */
-    @SuppressLint("HandlerLeak")
-    private class ExecuteHandler extends Handler {
-        private ExecuteHandler() {
-            super(Looper.getMainLooper());
-        }
-
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            super.handleMessage(msg);
             DownLoadBean bean = (DownLoadBean) msg.obj;
+            int what = msg.what;
+            switch (what) {
+                case DownLoadState.STATE_ERROR:
+                case DownLoadState.STATE_DOWNLOADED:
+                case DownLoadState.STATE_DELETE:
+                    Log.e("Message", "---> " + bean.toString());
+                    mTaskMap2.remove(bean.id);
+                    DownLoadBean poll = mWaitingQueue.poll();
+                    if (poll != null) {
+                        downNone2(poll);
+                    }
+                    break;
+                default:
+                    break;
+            }
+
             DownLoadObservable.getInstance().setData(bean);
         }
-    }
+    };
+    private LinkedBlockingDeque<DownLoadBean> mWaitingQueue = new LinkedBlockingDeque<>();
 
     private final static class Instance {
         static final DownLoadManager instance = new DownLoadManager();
@@ -61,20 +73,6 @@ public class DownLoadManager {
 
     public static DownLoadManager getInstance() {
         return Instance.instance;
-    }
-
-    public void download(DownLoadBean loadBean) {
-        //TODO 先判断是否连接过？得到过APK的大小？支持断点下载吗？
-        if (loadBean.totalSize == 0) {
-            ConnectThread connectThread = new ConnectThread(loadBean);
-            DownLoadExecutor.execute(connectThread);
-        } else {
-            startDownload(loadBean);
-        }
-        //TODO 更新数据库
-        DataBaseUtil.UpdateDownLoadById(loadBean);
-        //TODO 每次状态发生改变，都需要回调该方法通知所有观察者
-        notifyDownloadStateChanged(loadBean);
     }
 
     /**
@@ -90,7 +88,6 @@ public class DownLoadManager {
             //TODO 插入数据库
             DataBaseUtil.insertDown(loadBean);
         }
-
         int state = loadBean.downloadState;
         switch (state) {
             case DownLoadState.STATE_NONE://默认
@@ -106,7 +103,7 @@ public class DownLoadManager {
             case DownLoadState.STATE_PAUSED://暂停
                 downPaused(loadBean);
                 break;
-            case DownLoadState.STATE_DOWNLOADED://下载完毕
+            case STATE_DOWNLOADED://下载完毕
                 downLoaded();
                 break;
             case DownLoadState.STATE_ERROR://下载失败
@@ -117,7 +114,7 @@ public class DownLoadManager {
         }
     }
 
-    public void deleteDownTask(DownLoadBean item) {
+    void deleteDownTask(DownLoadBean item) {
         //TODO 删除文件，删除数据库
         try {
             item.downloadState = DownLoadState.STATE_DELETE;
@@ -125,7 +122,25 @@ public class DownLoadManager {
             if (remove != null)
                 remove.cancel();
             DataBaseUtil.DeleteDownLoadById(item.id);
-            notifyDownloadStateChanged(item);
+            notifyDownloadStateChanged(item, DownLoadState.STATE_DELETE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void deleteDownTask2(DownLoadBean item) {
+        Log.i("Message", "----->" + item.toString());
+        //TODO 删除文件，删除数据库
+        try {
+            DownLoadTask2 remove = mTaskMap2.remove(item.id);
+            if (remove != null) {
+                remove.cancle();
+            } else {
+                mWaitingQueue.remove(item);
+            }
+            item.downloadState = STATE_DELETE;
+            DataBaseUtil.DeleteDownLoadById(item.id);
+            notifyDownloadStateChanged(item, STATE_DELETE);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -134,14 +149,15 @@ public class DownLoadManager {
     /**
      * 当下载状态发送改变的时候调用
      */
-    private void notifyDownloadStateChanged(DownLoadBean bean) {
+    private void notifyDownloadStateChanged(DownLoadBean bean, int state) {
         Message message = handler.obtainMessage();
         message.obj = bean;
+        message.what = state;
         handler.sendMessage(message);
     }
 
 
-    public class DownLoadTask implements Runnable {
+    private class DownLoadTask implements Runnable {
         private volatile boolean isRunning = false;
         private DownLoadBean bean;
 
@@ -176,9 +192,9 @@ public class DownLoadManager {
                 case DownLoadState.STATE_ERROR:
                     bean.downloadState = DownLoadState.STATE_ERROR;
                     DataBaseUtil.UpdateDownLoadById(bean);
-                    notifyDownloadStateChanged(bean);
+                    notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
                 case DownLoadState.STATE_DOWNLOADING:
-                    Log.e("Edwin", "下载完毕");
+                    Log.v("Edwin", "下载完毕");
                     break;
                 default:
                     break;
@@ -218,7 +234,7 @@ public class DownLoadManager {
                         raf.write(buffer, 0, len);
                         bean.currentSize += len;
                         DataBaseUtil.UpdateDownLoadById(bean);
-                        notifyDownloadStateChanged(bean);
+                        notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
                     }
                     raf.close();
                     is.close();
@@ -236,28 +252,28 @@ public class DownLoadManager {
 
                         bean.currentSize += len;
                         DataBaseUtil.UpdateDownLoadById(bean);
-                        notifyDownloadStateChanged(bean);
+                        notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
                     }
                     fos.close();
                     is.close();
                 } else {
                     bean.downloadState = DownLoadState.STATE_ERROR;
                     DataBaseUtil.UpdateDownLoadById(bean);
-                    notifyDownloadStateChanged(bean);
+                    notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
                     return;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 bean.downloadState = DownLoadState.STATE_ERROR;
                 DataBaseUtil.UpdateDownLoadById(bean);
-                notifyDownloadStateChanged(bean);
+                notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
             }
 
             //TODO 判断是否下载完成
             if (bean.currentSize == bean.totalSize) {
-                bean.downloadState = DownLoadState.STATE_DOWNLOADED;
+                bean.downloadState = STATE_DOWNLOADED;
                 DataBaseUtil.UpdateDownLoadById(bean);
-                notifyDownloadStateChanged(bean);
+                notifyDownloadStateChanged(bean, STATE_DOWNLOADED);
             }
         }
 
@@ -302,8 +318,8 @@ public class DownLoadManager {
                 }
 
                 DataBaseUtil.UpdateDownLoadById(bean);
-                notifyDownloadStateChanged(bean);
-                Log.e("Edwin", "连接成功--isSupportRange = " + bean.isSupportRange);
+                notifyDownloadStateChanged(bean, DownLoadState.STATE_CONNECTION);
+                Log.i("Edwin", "连接成功--isSupportRange = " + bean.isSupportRange);
                 //TODO 开始下载咯
                 startDownload(bean);
             } catch (IOException e) {
@@ -311,8 +327,8 @@ public class DownLoadManager {
                 e.printStackTrace();
                 bean.downloadState = DownLoadState.STATE_ERROR;
                 DataBaseUtil.UpdateDownLoadById(bean);
-                notifyDownloadStateChanged(bean);
-                Log.e("Edwin", "连接失败");
+                notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
+                Log.i("Edwin", "连接失败");
             } finally {
                 if (connection != null) {
                     connection.disconnect();
@@ -326,11 +342,10 @@ public class DownLoadManager {
         }
 
         public void cancel() {
-            Log.e("Edwin", "No---Thread.currentThread() = " + Thread.currentThread().getName());
+            Log.i("Edwin", "No---Thread.currentThread() = " + Thread.currentThread().getName());
             isRunning = false;
         }
     }
-
 
     /**
      * 默认状态
@@ -392,7 +407,7 @@ public class DownLoadManager {
      */
     private void downError(DownLoadBean loadBean) {
         //TODO 1.删除本地文件文件
-        Log.e("Edwin", "删除本地文件文件 Id = " + loadBean.id);
+        Log.i("Edwin", "删除本地文件文件 Id = " + loadBean.id);
         //TODO 2.删除数据库
         DataBaseUtil.DeleteDownLoadById(loadBean.id);
         //TODO 3.重新插入数据库
@@ -414,6 +429,276 @@ public class DownLoadManager {
      */
     private void downLoaded() {
         //TODO 安装应用
-        Log.e("Edwin", "安装应用");
+        Log.i("Edwin", "安装应用");
+    }
+
+
+    public void download(DownLoadBean loadBean) {
+        //TODO 最最最--->先判断任务数是否
+        if (mTaskMap.size() >= DownloadConfig.getConfig().getMax_download_tasks()) {
+            mWaitingQueue.offer(loadBean);
+            loadBean.downloadState = DownLoadState.STATE_WAITING;
+            //TODO 更新数据库
+            DataBaseUtil.UpdateDownLoadById(loadBean);
+            //TODO 每次状态发生改变，都需要回调该方法通知所有观察者
+            notifyDownloadStateChanged(loadBean, DownLoadState.STATE_WAITING);
+        } else {
+            if (loadBean.totalSize == 0) {
+                ConnectThread connectThread = new ConnectThread(loadBean);
+                DownLoadExecutor.execute(connectThread);
+            } else {
+                //TODO 先判断是否有这个app的下载信息,更新信息
+                if (DataBaseUtil.getDownLoadById(loadBean.id) != null) {
+                    DataBaseUtil.UpdateDownLoadById(loadBean);
+                } else {
+                    //TODO 插入数据库
+                    DataBaseUtil.insertDown(loadBean);
+                }
+                startDownload(loadBean);
+            }
+        }
+    }
+
+    private class DownLoadTask2 implements Runnable {
+        private DownLoadBean bean;
+        private volatile boolean isRunning = false;
+
+        DownLoadTask2(DownLoadBean loadBean) {
+            this.bean = loadBean;
+        }
+
+        public boolean isRunning() {
+            return isRunning;
+        }
+
+        public void cancle() {
+            isRunning = true;
+        }
+
+        @Override
+        public void run() {
+            File destFile = DataBaseUtil.getDownloadFile(bean.url);
+            bean.path = destFile.getPath();
+            HttpURLConnection connection = null;
+            try {
+                connection = (HttpURLConnection) new URL(bean.url).openConnection();
+                connection.setRequestMethod("GET");
+                if (bean.isSupportRange) {
+                    connection.setRequestProperty("Range", "bytes=" + bean.currentSize + "-" + bean.totalSize);
+                }
+                connection.setConnectTimeout(Constants.CONNECT_TIME);
+                connection.setReadTimeout(Constants.READ_TIME);
+                int responseCode = connection.getResponseCode();
+                int contentLength = connection.getContentLength();
+
+                RandomAccessFile raf = null;
+                FileOutputStream fos = null;
+                InputStream is = null;
+                if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
+                    raf = new RandomAccessFile(destFile, "rw");
+                    raf.seek(bean.currentSize);
+                    is = connection.getInputStream();
+                    byte[] buffer = new byte[2048];
+                    int len = -1;
+                    while ((len = is.read(buffer)) != -1) {
+                        if (isRunning) {
+                            break;
+                        }
+                        raf.write(buffer, 0, len);
+                        bean.currentSize += len;
+                        DataBaseUtil.UpdateDownLoadById(bean);
+                        notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
+                    }
+                    raf.close();
+                    is.close();
+                } else if (responseCode == HttpURLConnection.HTTP_OK) {
+                    fos = new FileOutputStream(destFile);
+                    is = connection.getInputStream();
+                    byte[] buffer = new byte[2048];
+                    int len = -1;
+                    while ((len = is.read(buffer)) != -1) {
+                        if (isRunning) {
+                            break;
+                        }
+                        fos.write(buffer, 0, len);
+                        bean.currentSize += len;
+                        DataBaseUtil.UpdateDownLoadById(bean);
+                        notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
+                    }
+                    fos.close();
+                    is.close();
+                } else {
+                    bean.downloadState = DownLoadState.STATE_ERROR;
+                    DataBaseUtil.UpdateDownLoadById(bean);
+                    notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                bean.downloadState = DownLoadState.STATE_ERROR;
+                DataBaseUtil.UpdateDownLoadById(bean);
+                notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
+            }
+
+            //TODO 判断是否下载完成
+            if (bean.currentSize == bean.totalSize) {
+                bean.downloadState = STATE_DOWNLOADED;
+                DataBaseUtil.UpdateDownLoadById(bean);
+                notifyDownloadStateChanged(bean, STATE_DOWNLOADED);
+            }
+        }
+    }
+
+    /**
+     * 下载第二种
+     *
+     * @param loadBean
+     */
+    void download2(DownLoadBean loadBean) {
+        int state = loadBean.downloadState;
+        switch (state) {
+            case DownLoadState.STATE_NONE://默认
+                downNone2(loadBean);
+                break;
+            case DownLoadState.STATE_WAITING://等待中
+                downWaiting2(loadBean);
+                break;
+            case DownLoadState.STATE_PAUSED://暂停
+                downPaused2(loadBean);
+                break;
+            case DownLoadState.STATE_DOWNLOADING://下载中
+                break;
+            case DownLoadState.STATE_CONNECTION://连接中
+                break;
+            case DownLoadState.STATE_ERROR://下载失败
+            case STATE_DOWNLOADED://下载完毕
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    /**
+     * 连接的线程
+     */
+    private class ConnectThread2 implements Runnable {
+        private DownLoadBean bean;
+        private volatile boolean isRunning;
+
+        public ConnectThread2(DownLoadBean bean) {
+            this.bean = bean;
+        }
+
+        @Override
+        public void run() {
+            isRunning = true;
+            bean.downloadState = DownLoadState.STATE_CONNECTION;
+            HttpURLConnection connection = null;
+            try {
+                connection = (HttpURLConnection) new URL(bean.url).openConnection();
+                connection.setRequestMethod("GET");
+                connection.setConnectTimeout(Constants.CONNECT_TIME);
+                connection.setReadTimeout(Constants.READ_TIME);
+                int responseCode = connection.getResponseCode();
+                int contentLength = connection.getContentLength();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    String ranges = connection.getHeaderField("Accept-Ranges");
+                    if ("bytes".equals(ranges)) {
+                        bean.isSupportRange = true;
+                    }
+                    bean.totalSize = contentLength;
+                } else {
+                    bean.downloadState = DownLoadState.STATE_ERROR;
+                }
+
+                DataBaseUtil.UpdateDownLoadById(bean);
+                notifyDownloadStateChanged(bean, DownLoadState.STATE_CONNECTION);
+                Log.i("Edwin", "连接成功--isSupportRange = " + bean.isSupportRange);
+
+                //TODO 开始下载咯
+                DownLoadTask2 downLoadTask2 = new DownLoadTask2(bean);
+                mTaskMap2.put(bean.id, downLoadTask2);
+                DownLoadExecutor.execute(downLoadTask2);
+
+            } catch (IOException e) {
+                isRunning = false;
+                e.printStackTrace();
+                bean.downloadState = DownLoadState.STATE_ERROR;
+                DataBaseUtil.UpdateDownLoadById(bean);
+                notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
+                Log.i("Edwin", "连接失败");
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
+        }
+
+
+        public boolean isRunning() {
+            return isRunning;
+        }
+
+        public void cancel() {
+            Log.i("Edwin", "No---Thread.currentThread() = " + Thread.currentThread().getName());
+            isRunning = false;
+        }
+    }
+
+
+    private void downNone2(DownLoadBean loadBean) {
+        //TODO 最最最--->先判断任务数是否
+        if (mTaskMap2.size() >= DownloadConfig.getConfig().getMax_download_tasks()) {
+            mWaitingQueue.offer(loadBean);
+            loadBean.downloadState = DownLoadState.STATE_WAITING;
+            //TODO 更新数据库
+            DataBaseUtil.UpdateDownLoadById(loadBean);
+            //TODO 每次状态发生改变，都需要回调该方法通知所有观察者
+            notifyDownloadStateChanged(loadBean, DownLoadState.STATE_WAITING);
+        } else {
+            if (loadBean.totalSize <= 0) {
+                ConnectThread2 connectThread = new ConnectThread2(loadBean);
+                DownLoadExecutor.execute(connectThread);
+            } else {
+                DownLoadTask2 downLoadTask2 = new DownLoadTask2(loadBean);
+                mTaskMap2.put(loadBean.id, downLoadTask2);
+                DownLoadExecutor.execute(downLoadTask2);
+            }
+
+        }
+    }
+
+    /**
+     * 等待状态
+     */
+    private void downWaiting2(DownLoadBean loadBean) {
+        //TODO 1.移出去队列
+        mWaitingQueue.remove(loadBean);
+        Log.e("Edwin", "mWaitingQueue size = " + mWaitingQueue.size());
+
+        //TODO 2.TaskMap获取线程对象，移除线程;
+        DownLoadTask2 downLoadTask2 = mTaskMap2.get(loadBean.id);
+        if (downLoadTask2 != null)
+            downLoadTask2.cancle();
+        mTaskMap.remove(loadBean.id);
+
+        //TODO 3.状态修改成STATE_PAUSED;
+        loadBean.downloadState = DownLoadState.STATE_PAUSED;
+
+        //TODO 4.更新数据库
+        DataBaseUtil.UpdateDownLoadById(loadBean);
+
+        //TODO 5.每次状态发生改变，都需要回调该方法通知所有观察者
+        notifyDownloadStateChanged(loadBean, DownLoadState.STATE_PAUSED);
+    }
+
+
+    /**
+     * 暂停状态
+     */
+    private void downPaused2(DownLoadBean loadBean) {
+        //TODO 1.状态修改成STATE_WAITING;
+        loadBean.downloadState = DownLoadState.STATE_WAITING;
+        downNone2(loadBean);
     }
 }

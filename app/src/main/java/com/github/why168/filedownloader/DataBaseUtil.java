@@ -157,7 +157,6 @@ public class DataBaseUtil {
 
         boolean update = helper.update(true, Constants.TABLE_DOWN, titles, values,
                 Constants.DOWN_ID + " =? ", new String[]{bean.id});
-        Log.e("Edwin", "update = " + update);
     }
 
     /**

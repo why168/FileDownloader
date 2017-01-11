@@ -97,6 +97,13 @@ public class MainActivity extends AppCompatActivity implements Observer {
         bean8.url = "http://d3g.qq.com/musicapp/kge/877/karaoke_3.6.8.278_android_r31018_20160725154442_release_GW_D.apk";
         bean8.id = FileUtilities.getMd5FileName(bean8.url);
 
+
+        DownLoadBean bean9 = new DownLoadBean();
+        bean9.appName = "魔秀桌面";
+        bean9.appIcon = "http://e.hiphotos.bdimg.com/wisegame/pic/item/db99a9014c086e0639999b2f0a087bf40ad1cba5.jpg";
+        bean9.url = "http://211.161.126.174/imtt.dd.qq.com/16891/41C80B55FE1051D8C09D2C2B3D17F9F3.apk?mkey=5874800846b6ee89&f=8f5d&c=0&fsname=com.moxiu.launcher_5.8.5_585.apk&csr=4d5s&p=.apk";
+        bean9.id = FileUtilities.getMd5FileName(bean9.url);
+
         loadBeen.add(bean1);
         loadBeen.add(bean2);
         loadBeen.add(bean3);
@@ -105,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         loadBeen.add(bean6);
         loadBeen.add(bean7);
         loadBeen.add(bean8);
+        loadBeen.add(bean9);
 
     }
 
@@ -131,28 +139,25 @@ public class MainActivity extends AppCompatActivity implements Observer {
     public void update(Observable o, Object arg) {
         DownLoadBean bean = (DownLoadBean) arg;
         int index = loadBeen.indexOf(bean);
-        Log.e("Edwin", "index = " + index + " bean = " + bean.toString());
+        Log.i("Edwin", "index = " + index + " bean = " + bean.toString());
         int downloadState = bean.downloadState;
 
         if (index != -1 && isCurrentListViewItemVisible(index)) {
             if (downloadState == DownLoadState.STATE_DELETE) {
                 viewAdapter.notifyItemRemoved(index);
                 loadBeen.remove(index);
-//                notifyChange(bean, index);
                 if (index != loadBeen.size())
-//                    viewAdapter.notifyItemChanged(index, loadBeen.size() - index);
                     notifyChange(bean, index);
                 try {
                     File file = new File(bean.path);
                     boolean delete = file.delete();
-                    Log.e("Edwin", "删除 state = " + delete);
+                    Log.i("Edwin", "删除 state = " + delete);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             } else {
                 loadBeen.remove(index);
                 loadBeen.add(index, bean);
-//                viewAdapter.notifyItemChanged(index, "index");
                 notifyChange(bean, index);
             }
         }
@@ -230,8 +235,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     holder.button_start.setText("点击下载");
                     break;
                 case DownLoadState.STATE_WAITING:
-                    //TODO 等待下载 改成 排队下载
-                    holder.button_start.setText("排队下载");
+                    holder.button_start.setText("等待下载");
                     break;
                 case DownLoadState.STATE_DOWNLOADING:
                     //TODO 下载中 改成 正在下载
@@ -254,12 +258,12 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
             holder.button_delete.setOnClickListener(v -> {
                 // 删除下载
-                DownLoadManager.getInstance().deleteDownTask(item);
+                DownLoadManager.getInstance().deleteDownTask2(item);
             });
 
             holder.button_start.setOnClickListener(v -> {
                 // 开启下载
-                DownLoadManager.getInstance().download(item);
+                DownLoadManager.getInstance().download2(item);
             });
 
             holder.text_progress.setText(FormetFileSize(item.currentSize) + "/" + FormetFileSize(item.totalSize));
