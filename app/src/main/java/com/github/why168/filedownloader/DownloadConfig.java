@@ -6,7 +6,7 @@ package com.github.why168.filedownloader;
  * @since JDK1.8
  */
 public class DownloadConfig {
-    private int max_download_tasks = 1;
+    private int max_download_tasks = 2;
 
     private DownloadConfig() {
 

@@ -493,6 +493,7 @@ public class DownLoadManager {
                 int responseCode = connection.getResponseCode();
                 int contentLength = connection.getContentLength();
 
+                bean.totalSize = contentLength;
                 RandomAccessFile raf = null;
                 FileOutputStream fos = null;
                 InputStream is = null;
@@ -514,6 +515,7 @@ public class DownLoadManager {
                     raf.close();
                     is.close();
                 } else if (responseCode == HttpURLConnection.HTTP_OK) {
+                    bean.currentSize = 0;
                     fos = new FileOutputStream(destFile);
                     is = connection.getInputStream();
                     byte[] buffer = new byte[2048];
