@@ -3,6 +3,7 @@ package com.github.why168.filedownloader;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.github.why168.filedownloader.bean.DownLoadBean;
 import com.github.why168.filedownloader.constant.Constants;
@@ -51,6 +52,7 @@ public class DownLoadManager {
                 case DownLoadState.STATE_ERROR:
                 case DownLoadState.STATE_DOWNLOADED:
                 case DownLoadState.STATE_DELETE:
+                case DownLoadState.STATE_PAUSED:
                     Log.e("Message", "---> " + bean.toString());
                     mTaskMap2.remove(bean.id);
                     DownLoadBean poll = mWaitingQueue.poll();
@@ -129,7 +131,6 @@ public class DownLoadManager {
     }
 
     void deleteDownTask2(DownLoadBean item) {
-        Log.i("Message", "----->" + item.toString());
         //TODO 删除文件，删除数据库
         try {
             DownLoadTask2 remove = mTaskMap2.remove(item.id);
@@ -480,6 +481,7 @@ public class DownLoadManager {
             File destFile = DataBaseUtil.getDownloadFile(bean.url);
             bean.path = destFile.getPath();
             HttpURLConnection connection = null;
+            bean.downloadState = DownLoadState.STATE_DOWNLOADING;
             try {
                 connection = (HttpURLConnection) new URL(bean.url).openConnection();
                 connection.setRequestMethod("GET");
@@ -554,6 +556,14 @@ public class DownLoadManager {
      * @param loadBean
      */
     void download2(DownLoadBean loadBean) {
+        //TODO 先判断是否有这个app的下载信息,更新信息
+        if (DataBaseUtil.getDownLoadById(loadBean.id) != null) {
+            DataBaseUtil.UpdateDownLoadById(loadBean);
+        } else {
+            //TODO 插入数据库
+            DataBaseUtil.insertDown(loadBean);
+        }
+
         int state = loadBean.downloadState;
         switch (state) {
             case DownLoadState.STATE_NONE://默认
@@ -566,11 +576,15 @@ public class DownLoadManager {
                 downPaused2(loadBean);
                 break;
             case DownLoadState.STATE_DOWNLOADING://下载中
+                downLoading2(loadBean);
                 break;
             case DownLoadState.STATE_CONNECTION://连接中
                 break;
             case DownLoadState.STATE_ERROR://下载失败
-            case STATE_DOWNLOADED://下载完毕
+                downError2(loadBean);
+                break;
+            case DownLoadState.STATE_DOWNLOADED://下载完毕
+                Toast.makeText(BaseApplication.mContext, loadBean.appName + "->下载完毕", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;
@@ -701,4 +715,47 @@ public class DownLoadManager {
         loadBean.downloadState = DownLoadState.STATE_WAITING;
         downNone2(loadBean);
     }
+
+
+    /**
+     * 下载状态
+     */
+    private void downLoading2(DownLoadBean loadBean) {
+        //TODO 1.TaskMap获取线程对象，移除线程;
+        DownLoadTask2 downLoadTask = mTaskMap2.get(loadBean.id);
+        if (downLoadTask != null) {
+            downLoadTask.cancle();
+            mTaskMap2.remove(loadBean.id);
+        } else {
+            mWaitingQueue.remove(loadBean);
+        }
+        //TODO 2.状态修改成STATE_PAUSED;
+        loadBean.downloadState = DownLoadState.STATE_PAUSED;
+        notifyDownloadStateChanged(loadBean, DownLoadState.STATE_PAUSED);
+    }
+
+
+    /**
+     * 下载失败2
+     */
+    private void downError2(DownLoadBean loadBean) {
+        //TODO 1.删除本地文件文件
+        Log.i("Edwin", "删除本地文件文件 Id = " + loadBean.id);
+        //TODO 2.更新数据库数据库
+        DataBaseUtil.UpdateDownLoadById(loadBean);
+
+        loadBean.downloadState = DownLoadState.STATE_NONE;
+
+//        /*********以下操作与默认状态一样*********/
+//        //TODO 4.状态修改成STATE_WAITING；
+//        loadBean.downloadState = DownLoadState.STATE_WAITING;
+//        //TODO 5.创建一个线程;
+//        DownLoadTask downLoadTask = new DownLoadTask(loadBean);
+//        //TODO 6.放入TaskMap集合;
+//        mTaskMap.put(loadBean.id, downLoadTask);
+//        //TODO 7.启动执行线程execute
+//        DownLoadExecutor.execute(downLoadTask);
+        download2(loadBean);
+    }
+
 }

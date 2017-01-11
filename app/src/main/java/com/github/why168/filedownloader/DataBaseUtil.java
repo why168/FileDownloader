@@ -3,8 +3,6 @@ package com.github.why168.filedownloader;
 import android.database.Cursor;
 import android.os.Environment;
 import android.text.TextUtils;
-import android.util.Log;
-
 import com.github.why168.filedownloader.bean.DownLoadBean;
 import com.github.why168.filedownloader.constant.Constants;
 import com.github.why168.filedownloader.db.SQLiteDataBaseDown;
@@ -49,7 +47,6 @@ public class DataBaseUtil {
                 bean.isSupportRange + ""};
 
         boolean insert = helper.insert(true, table, titles, values);
-        Log.e("Edwin", "insert = " + insert + " \n " + bean.toString());
     }
 
     /**
