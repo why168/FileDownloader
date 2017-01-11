@@ -28,15 +28,11 @@ public class DownLoadBean {
 
     @Override
     public String toString() {
-        return "DownLoadBean{" +
-                "id='" + id + '\'' +
-                ", appName='" + appName + '\'' +
+        return "appName='" + appName +
                 ", isSupportRange=" + isSupportRange +
                 ", totalSize=" + totalSize +
                 ", currentSize=" + currentSize +
                 ", downloadState=" + downloadState +
-                ", url='" + url + '\'' +
-                ", path='" + path + '\'' +
                 '}';
     }
 }

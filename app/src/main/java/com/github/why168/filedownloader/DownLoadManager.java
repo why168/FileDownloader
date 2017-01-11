@@ -493,11 +493,12 @@ public class DownLoadManager {
                 int responseCode = connection.getResponseCode();
                 int contentLength = connection.getContentLength();
 
-                bean.totalSize = contentLength;
+
                 RandomAccessFile raf = null;
                 FileOutputStream fos = null;
                 InputStream is = null;
                 if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
+                    Log.e("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_PARTIAL);
                     raf = new RandomAccessFile(destFile, "rw");
                     raf.seek(bean.currentSize);
                     is = connection.getInputStream();
@@ -515,6 +516,7 @@ public class DownLoadManager {
                     raf.close();
                     is.close();
                 } else if (responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.e("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_OK);
                     bean.currentSize = 0;
                     fos = new FileOutputStream(destFile);
                     is = connection.getInputStream();

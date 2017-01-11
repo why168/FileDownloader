@@ -8,9 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -204,6 +201,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 break;
         }
 
+        holder.text_range.setText(String.valueOf(bean.isSupportRange));
         holder.text_progress.setText(FormetFileSize(bean.currentSize) + "/" + FormetFileSize(bean.totalSize));
         holder.progressBar.setMax((int) bean.totalSize);
         holder.progressBar.setProgress((int) bean.currentSize);
@@ -259,6 +257,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     break;
             }
 
+            holder.text_range.setText(String.valueOf(item.isSupportRange));
+
             holder.button_delete.setOnClickListener(v -> {
                 // 删除下载
                 DownLoadManager.getInstance().deleteDownTask2(item);
@@ -287,6 +287,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         Button button_delete;
         TextView text_progress;
         ProgressBar progressBar;
+        TextView text_range;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -295,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             button_delete = (Button) itemView.findViewById(R.id.button_delete);
             text_progress = (TextView) itemView.findViewById(R.id.text_progress);
             progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
+            text_range = (TextView) itemView.findViewById(R.id.text_range);
         }
     }
 
