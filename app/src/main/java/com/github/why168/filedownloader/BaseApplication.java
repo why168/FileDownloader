@@ -2,10 +2,8 @@ package com.github.why168.filedownloader;
 
 import android.app.Application;
 import android.content.Context;
-import android.os.AsyncTask;
 
-import com.github.why168.filedownloader.constant.Constants;
-import com.github.why168.filedownloader.db.SQLiteDataBaseDown;
+import com.github.why168.filedownloader.utlis.DownLoadConfig;
 
 /**
  * @author Edwin.Wu
@@ -15,26 +13,13 @@ import com.github.why168.filedownloader.db.SQLiteDataBaseDown;
 public class BaseApplication extends Application {
     public static Context mContext;
 
-    /**
-     * 数据库操作
-     */
-    public static SQLiteDataBaseDown sqLiteDataBaseDown;
-
     @Override
     public void onCreate() {
         super.onCreate();
         mContext = this;
 
+        //TODO 初始化DownLoad
+        DownLoadConfig.getConfig().setMax_download_tasks(2);
     }
 
-
-    /**
-     * 获取数据库对象
-     */
-    public static SQLiteDataBaseDown getSqLiteDataBaseDown() {
-        if (sqLiteDataBaseDown == null) {
-            sqLiteDataBaseDown = new SQLiteDataBaseDown(mContext, Constants.DATA_BASE_DOWN);
-        }
-        return sqLiteDataBaseDown;
-    }
 }

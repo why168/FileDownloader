@@ -1,4 +1,4 @@
-package com.github.why168.filedownloader;
+package com.github.why168.filedownloader.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,16 +12,19 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.github.why168.filedownloader.DownLoadManager;
+import com.github.why168.filedownloader.R;
 import com.github.why168.filedownloader.bean.DownLoadBean;
 import com.github.why168.filedownloader.constant.DownLoadState;
-import com.github.why168.filedownloader.pattern.DownLoadObservable;
+import com.github.why168.filedownloader.notify.DownLoadObservable;
+import com.github.why168.filedownloader.utlis.FileUtilities;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+
 
 /**
  * 多任务下载
@@ -116,24 +119,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     }
 
-    public String FormetFileSize(long fileSize) {// 转换文件大小
-        if (fileSize <= 0) {
-            return "0M";
-        }
-        DecimalFormat df = new DecimalFormat("#.00");
-        String fileSizeString = "";
-        if (fileSize < 1024) {
-            fileSizeString = df.format((double) fileSize) + "B";
-        } else if (fileSize < 1048576) {
-            fileSizeString = df.format((double) fileSize / 1024) + "K";
-        } else if (fileSize < 1073741824) {
-            fileSizeString = df.format((double) fileSize / 1048576) + "M";
-        } else {
-            fileSizeString = df.format((double) fileSize / 1073741824) + "G";
-        }
-        return fileSizeString;
-    }
-
 
     @Override
     public void update(Observable o, Object arg) {
@@ -202,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
 
         holder.text_range.setText(String.valueOf(bean.isSupportRange));
-        holder.text_progress.setText(FormetFileSize(bean.currentSize) + "/" + FormetFileSize(bean.totalSize));
+        holder.text_progress.setText(FileUtilities.convertFileSize(bean.currentSize)+"/"+FileUtilities.convertFileSize(bean.totalSize));
         holder.progressBar.setMax((int) bean.totalSize);
         holder.progressBar.setProgress((int) bean.currentSize);
     }
@@ -261,15 +246,15 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
             holder.button_delete.setOnClickListener(v -> {
                 // 删除下载
-                DownLoadManager.getInstance().deleteDownTask2(item);
+                DownLoadManager.getInstance().deleteDownTask(MainActivity.this, item);
             });
 
             holder.button_start.setOnClickListener(v -> {
                 // 开启下载
-                DownLoadManager.getInstance().download2(item);
+                DownLoadManager.getInstance().download(MainActivity.this, item);
             });
 
-            holder.text_progress.setText(FormetFileSize(item.currentSize) + "/" + FormetFileSize(item.totalSize));
+            holder.text_progress.setText(FileUtilities.convertFileSize(item.currentSize)+"/"+FileUtilities.convertFileSize(item.totalSize));
 
             holder.progressBar.setMax((int) item.totalSize);
             holder.progressBar.setProgress((int) item.currentSize);

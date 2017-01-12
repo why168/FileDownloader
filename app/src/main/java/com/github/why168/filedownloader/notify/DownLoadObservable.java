@@ -1,4 +1,4 @@
-package com.github.why168.filedownloader.pattern;
+package com.github.why168.filedownloader.notify;
 
 import com.github.why168.filedownloader.bean.DownLoadBean;
 

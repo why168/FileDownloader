@@ -1,13 +1,12 @@
-package com.github.why168.filedownloader;
+package com.github.why168.filedownloader.db;
 
+import android.content.Context;
 import android.database.Cursor;
-import android.os.Environment;
 import android.text.TextUtils;
+
 import com.github.why168.filedownloader.bean.DownLoadBean;
 import com.github.why168.filedownloader.constant.Constants;
-import com.github.why168.filedownloader.db.SQLiteDataBaseDown;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -18,11 +17,9 @@ import java.util.ArrayList;
  * @since JDK1.8
  */
 public class DataBaseUtil {
-    public synchronized static void insertDown(DownLoadBean bean) {
+
+    public synchronized static void insertDown(Context context, DownLoadBean bean) {
         String table = Constants.TABLE_DOWN;// 表名
-        SQLiteDataBaseDown helper = BaseApplication.getSqLiteDataBaseDown();
-
-
         /** 字段名对应字段值 **/
         String[] titles = new String[]{
                 Constants.DOWN_ID,
@@ -46,18 +43,15 @@ public class DataBaseUtil {
                 bean.currentSize + "",
                 bean.isSupportRange + ""};
 
-        boolean insert = helper.insert(true, table, titles, values);
+        boolean insert = new DownLoadDao(context).insert(true, table, titles, values);
     }
 
     /**
      * 根据id获取数据
      */
-    public synchronized static DownLoadBean getDownLoadById(String DownloadID) {
+    public synchronized static DownLoadBean getDownLoadById(Context context, String DownloadID) {
         DownLoadBean bean = null;
-
-        SQLiteDataBaseDown helper = BaseApplication.getSqLiteDataBaseDown();
-
-        Cursor cursor = helper.select(Constants.TABLE_DOWN,
+        Cursor cursor = new DownLoadDao(context).select(Constants.TABLE_DOWN,
                 new String[]{"*"}, Constants.DOWN_ID + " = ? ",
                 new String[]{DownloadID}, null, null, null, null);
         if (cursor.moveToNext()) {
@@ -82,18 +76,15 @@ public class DataBaseUtil {
                     .getColumnIndex(Constants.DOWN_SUPPORT_RANGE)) != 0;
         }
         cursor.close();
-        helper.close();
         return bean;
     }
 
     /**
      * 获取所有数据
      */
-    public synchronized static ArrayList<DownLoadBean> getDownLoad() {
+    public synchronized static ArrayList<DownLoadBean> getDownLoad(Context context) {
         ArrayList<DownLoadBean> list = new ArrayList<DownLoadBean>();
-        SQLiteDataBaseDown helper = BaseApplication.getSqLiteDataBaseDown();
-
-        Cursor cursor = helper.select(Constants.TABLE_DOWN, new String[]{"*"}, null, null, null, null, null, null);
+        Cursor cursor = new DownLoadDao(context).select(Constants.TABLE_DOWN, new String[]{"*"}, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             DownLoadBean bean = new DownLoadBean();
             bean.id = cursor.getString(cursor
@@ -118,16 +109,13 @@ public class DataBaseUtil {
             list.add(bean);
         }
         cursor.close();
-        helper.close();
         return list;
     }
 
     /**
      * 修改下载数据库
      */
-    public synchronized static void UpdateDownLoadById(DownLoadBean bean) {
-        SQLiteDataBaseDown helper = BaseApplication.getSqLiteDataBaseDown();
-
+    public synchronized static void UpdateDownLoadById(Context context, DownLoadBean bean) {
         /** 字段名对应字段值 **/
         String[] titles = new String[]{
                 Constants.DOWN_ID,
@@ -152,23 +140,16 @@ public class DataBaseUtil {
                 bean.isSupportRange + ""};
 
 
-        boolean update = helper.update(true, Constants.TABLE_DOWN, titles, values,
-                Constants.DOWN_ID + " =? ", new String[]{bean.id});
+        new DownLoadDao(context).update(true, Constants.TABLE_DOWN, titles, values, Constants.DOWN_ID + " =? ", new String[]{bean.id});
     }
 
     /**
      * 删除下载数据库数据
      */
-    public synchronized static void DeleteDownLoadById(String id) {
-        SQLiteDataBaseDown helper = BaseApplication.getSqLiteDataBaseDown();
+    public synchronized static void DeleteDownLoadById(Context context, String id) {
         if (!TextUtils.isEmpty(id)) {
-            helper.delete(true, Constants.TABLE_DOWN, Constants.DOWN_ID + " =? ", new String[]{id});
+            new DownLoadDao(context).delete(true, Constants.TABLE_DOWN, Constants.DOWN_ID + " =? ", new String[]{id});
         }
-//            helper.delete(true, Constants.TABLE_DOWN, null, null);
     }
 
-    public synchronized static File getDownloadFile(String url) {
-        File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        return new File(downloadDir, FileUtilities.getMd5FileName(url));
-    }
 }
