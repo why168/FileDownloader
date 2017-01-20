@@ -1,7 +1,6 @@
 package com.github.why168.filedownloader.notify;
 
 import com.github.why168.filedownloader.bean.DownLoadBean;
-import com.github.why168.filedownloader.constant.DownLoadState;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -18,26 +17,26 @@ public class DownFileObserver implements Observer {
     public void update(Observable o, Object arg) {
         DownLoadBean bean = (DownLoadBean) arg;
         String id = bean.id;
-        int downloadState = bean.downloadState;
-        switch (downloadState) {
-            case DownLoadState.STATE_NONE:
-                break;
-            case DownLoadState.STATE_WAITING:
-                onPrepare(bean);
-                break;
-            case DownLoadState.STATE_DOWNLOADING:
-                onProgress(bean);
-                break;
-            case DownLoadState.STATE_PAUSED:
-                onStop(bean);
-                break;
-            case DownLoadState.STATE_DOWNLOADED:
-                onFinish(bean);
-                break;
-            case DownLoadState.STATE_ERROR:
-                onError(bean);
-                break;
-        }
+//        int downloadState = bean.downloadState;
+//        switch (downloadState) {
+//            case DownLoadState.STATE_NONE:
+//                break;
+//            case DownLoadState.STATE_WAITING:
+//                onPrepare(bean);
+//                break;
+//            case DownLoadState.STATE_DOWNLOADING:
+//                onProgress(bean);
+//                break;
+//            case DownLoadState.STATE_PAUSED:
+//                onStop(bean);
+//                break;
+//            case DownLoadState.STATE_DOWNLOADED:
+//                onFinish(bean);
+//                break;
+//            case DownLoadState.STATE_ERROR:
+//                onError(bean);
+//                break;
+//        }
         //TODO 通过Id，
 
     }

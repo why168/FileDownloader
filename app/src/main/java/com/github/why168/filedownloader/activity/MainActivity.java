@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.github.why168.filedownloader.DownLoadManager;
+import com.github.why168.filedownloader.DownloadManager;
 import com.github.why168.filedownloader.R;
 import com.github.why168.filedownloader.bean.DownLoadBean;
 import com.github.why168.filedownloader.constant.DownLoadState;
@@ -21,7 +21,6 @@ import com.github.why168.filedownloader.utlis.FileUtilities;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -34,10 +33,11 @@ import java.util.Observer;
  * @since JDK1.8
  */
 public class MainActivity extends AppCompatActivity implements Observer {
-    private List<DownLoadBean> loadBeen = new ArrayList<>();
+    private ArrayList<DownLoadBean> collections;
     private LayoutInflater mLayoutInflater;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter viewAdapter;
+    private DownloadManager mDownloadManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +49,12 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(viewAdapter = new ViewAdapter());
+
     }
 
     private void initData() {
+        mDownloadManager = DownloadManager.getInstance(this);
+        collections = new ArrayList<>();
         DownLoadBean bean1 = new DownLoadBean();
         bean1.appName = "爱奇艺";
         bean1.appIcon = "http://f.hiphotos.bdimg.com/wisegame/pic/item/1fd98d1001e93901b446c6217cec54e736d1966d.jpg";
@@ -107,31 +110,30 @@ public class MainActivity extends AppCompatActivity implements Observer {
         bean9.url = "http://211.161.126.174/imtt.dd.qq.com/16891/41C80B55FE1051D8C09D2C2B3D17F9F3.apk?mkey=5874800846b6ee89&f=8f5d&c=0&fsname=com.moxiu.launcher_5.8.5_585.apk&csr=4d5s&p=.apk";
         bean9.id = FileUtilities.getMd5FileName(bean9.url);
 
-        loadBeen.add(bean1);
-        loadBeen.add(bean2);
-        loadBeen.add(bean3);
-        loadBeen.add(bean4);
-        loadBeen.add(bean5);
-        loadBeen.add(bean6);
-        loadBeen.add(bean7);
-        loadBeen.add(bean8);
-        loadBeen.add(bean9);
-
+        collections.clear();
+        collections.add(bean1);
+        collections.add(bean2);
+        collections.add(bean3);
+        collections.add(bean4);
+        collections.add(bean5);
+        collections.add(bean6);
+        collections.add(bean7);
+        collections.add(bean8);
+        collections.add(bean9);
     }
-
 
     @Override
     public void update(Observable o, Object arg) {
-        DownLoadBean bean = (DownLoadBean) arg;
-        int index = loadBeen.indexOf(bean);
+        final DownLoadBean bean = (DownLoadBean) arg;
+        int index = collections.indexOf(bean);
         Log.i("Edwin", "index = " + index + " bean = " + bean.toString());
         int downloadState = bean.downloadState;
 
         if (index != -1 && isCurrentListViewItemVisible(index)) {
             if (downloadState == DownLoadState.STATE_DELETE) {
                 viewAdapter.notifyItemRemoved(index);
-                loadBeen.remove(index);
-                if (index != loadBeen.size())
+                collections.remove(index);
+                if (index != collections.size())
                     notifyChange(bean, index);
                 try {
                     File file = new File(bean.path);
@@ -141,13 +143,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     e.printStackTrace();
                 }
             } else {
-                loadBeen.remove(index);
-                loadBeen.add(index, bean);
+                collections.set(index, bean);
                 notifyChange(bean, index);
             }
         }
-
-
     }
 
     /**
@@ -156,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
      * @param bean
      * @param index
      */
-    private void notifyChange(DownLoadBean bean, int index) {
+    private void notifyChange(final DownLoadBean bean, int index) {
         ViewHolder holder = getViewHolder(index);
 
         switch (bean.downloadState) {
@@ -186,8 +185,23 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 break;
         }
 
+        holder.button_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDownloadManager.delete(bean);
+            }
+        });
+
+        holder.button_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDownloadManager.down(bean);
+            }
+        });
+
+        holder.text_name.setText(bean.appName);
         holder.text_range.setText(String.valueOf(bean.isSupportRange));
-        holder.text_progress.setText(FileUtilities.convertFileSize(bean.currentSize)+"/"+FileUtilities.convertFileSize(bean.totalSize));
+        holder.text_progress.setText(FileUtilities.convertFileSize(bean.currentSize) + "/" + FileUtilities.convertFileSize(bean.totalSize));
         holder.progressBar.setMax((int) bean.totalSize);
         holder.progressBar.setProgress((int) bean.currentSize);
     }
@@ -204,7 +218,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         DownLoadObservable.getInstance().deleteObserver(this);
     }
 
-
     private class ViewAdapter extends RecyclerView.Adapter<ViewHolder> {
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -212,11 +225,16 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            DownLoadBean item = loadBeen.get(position);
-            holder.text_name.setText(item.appName);
+        public long getItemId(int position) {
+            return position;
+        }
 
-            switch (item.downloadState) {
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            final DownLoadBean bean = collections.get(position);
+            holder.text_name.setText(bean.appName);
+
+            switch (bean.downloadState) {
                 case DownLoadState.STATE_NONE:
                     holder.button_start.setText("点击下载");
                     break;
@@ -242,31 +260,33 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     break;
             }
 
-            holder.text_range.setText(String.valueOf(item.isSupportRange));
-
-            holder.button_delete.setOnClickListener(v -> {
-                // 删除下载
-                DownLoadManager.getInstance().deleteDownTask(MainActivity.this, item);
+            holder.button_delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDownloadManager.delete(bean);
+                }
             });
 
-            holder.button_start.setOnClickListener(v -> {
-                // 开启下载
-                DownLoadManager.getInstance().download(MainActivity.this, item);
+            holder.button_start.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDownloadManager.down(bean);
+                }
             });
 
-            holder.text_progress.setText(FileUtilities.convertFileSize(item.currentSize)+"/"+FileUtilities.convertFileSize(item.totalSize));
-
-            holder.progressBar.setMax((int) item.totalSize);
-            holder.progressBar.setProgress((int) item.currentSize);
+            holder.text_range.setText(String.valueOf(bean.isSupportRange));
+            holder.text_progress.setText(FileUtilities.convertFileSize(bean.currentSize) + "/" + FileUtilities.convertFileSize(bean.totalSize));
+            holder.progressBar.setMax((int) bean.totalSize);
+            holder.progressBar.setProgress((int) bean.currentSize);
         }
 
         @Override
         public int getItemCount() {
-            return loadBeen.size();
+            return collections.size();
         }
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    final static class ViewHolder extends RecyclerView.ViewHolder {
         TextView text_name;
         Button button_start;
         Button button_delete;
@@ -295,5 +315,4 @@ public class MainActivity extends AppCompatActivity implements Observer {
         int last = layoutManager.findLastVisibleItemPosition();
         return first <= position && position <= last;
     }
-
 }

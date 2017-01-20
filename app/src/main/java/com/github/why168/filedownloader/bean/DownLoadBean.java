@@ -1,6 +1,6 @@
 package com.github.why168.filedownloader.bean;
-
 import com.github.why168.filedownloader.constant.DownLoadState;
+import java.io.Serializable;
 
 /**
  * 下载任务实体类
@@ -9,7 +9,7 @@ import com.github.why168.filedownloader.constant.DownLoadState;
  * @version 2016/12/28 11:26
  * @since JDK1.8
  */
-public class DownLoadBean {
+public class DownLoadBean implements Serializable, Cloneable {
     public String id;//app的id url-md5
     public String appName;//app的软件名称
     public String appIcon;//app的图片
@@ -20,6 +20,10 @@ public class DownLoadBean {
     public String path;//保存路径
     public boolean isSupportRange = false;//是否支持断点下载
 
+
+    public DownLoadBean() {
+    }
+
     @Override
     public String toString() {
         return "appName='" + appName +
@@ -28,5 +32,20 @@ public class DownLoadBean {
                 ", currentSize=" + currentSize +
                 ", downloadState=" + downloadState +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o.hashCode() == this.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

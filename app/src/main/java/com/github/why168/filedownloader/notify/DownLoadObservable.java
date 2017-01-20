@@ -1,5 +1,7 @@
 package com.github.why168.filedownloader.notify;
 
+import android.util.Log;
+
 import com.github.why168.filedownloader.bean.DownLoadBean;
 
 import java.util.Observable;
@@ -31,7 +33,12 @@ public class DownLoadObservable extends Observable {
     }
 
     private void dataChange(DownLoadBean data) {
+        Log.e("lzx","DownLoadObservable setData " + data.downloadState + "  " + data.currentSize);
         this.setChanged();
         this.notifyObservers(data);
+    }
+
+    public DownLoadBean getData() {
+        return data;
     }
 }

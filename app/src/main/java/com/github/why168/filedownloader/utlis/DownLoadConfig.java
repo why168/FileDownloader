@@ -11,7 +11,7 @@ public class DownLoadConfig {
     /**
      * 下载的任务数
      */
-    private int max_download_tasks = 1;
+    private int max_download_tasks = 3;
 
     private DownLoadConfig() {
 
