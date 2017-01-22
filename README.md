@@ -6,7 +6,7 @@
 本人能力有限，暂时不能更新了，等有时间再深入多线程Service研究。
 
 ### 效果图 
-![Image of 示例](https://raw.githubusercontent.com/why168/FileDownloader/Art/down.gif)
+![Image of 示例](https://raw.githubusercontent.com/why168/FileDownloader/master/Art/down.gif)
 
 # Code
 
