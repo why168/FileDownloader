@@ -18,7 +18,7 @@ import java.util.ArrayList;
  */
 public class DataBaseUtil {
 
-    public synchronized static void insertDown(Context context, DownLoadBean bean) {
+    public synchronized static boolean insertDown(Context context, DownLoadBean bean) {
         String table = Constants.TABLE_DOWN;// 表名
         /** 字段名对应字段值 **/
         String[] titles = new String[]{
@@ -33,7 +33,8 @@ public class DataBaseUtil {
                 Constants.DOWN_SUPPORT_RANGE};
 
         /** 字段值对应字段名 **/
-        String[] values = new String[]{bean.id + "",
+        String[] values = new String[]{
+                bean.id + "",
                 bean.appName + "",
                 bean.appIcon + "",
                 bean.url + "",
@@ -41,9 +42,9 @@ public class DataBaseUtil {
                 bean.downloadState + "",
                 bean.totalSize + "",
                 bean.currentSize + "",
-                bean.isSupportRange + ""};
+                bean.isSupportRange ? 1 + "" : 0 + ""};
 
-        boolean insert = new DownLoadDao(context).insert(true, table, titles, values);
+        return new DownLoadDao(context).insert(true, table, titles, values);
     }
 
     /**

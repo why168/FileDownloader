@@ -6,6 +6,8 @@ import android.content.Context;
 import com.github.why168.filedownloader.utlis.DownLoadConfig;
 
 /**
+ * Application
+ *
  * @author Edwin.Wu
  * @version 2016/12/28 14:49
  * @since JDK1.8

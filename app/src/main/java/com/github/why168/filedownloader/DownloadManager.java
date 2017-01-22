@@ -8,13 +8,15 @@ import com.github.why168.filedownloader.constant.Constants;
 import com.github.why168.filedownloader.service.DownLoadService;
 
 /**
+ * DownloadManager
+ *
  * @author Edwin.Wu
  * @version 2017/1/16 15:27
  * @since JDK1.8
  */
 public class DownloadManager {
 
-    private static DownloadManager mInstance;
+    private static DownloadManager instance;
     private final Context context;
 
     private DownloadManager(Context context) {
@@ -22,11 +24,15 @@ public class DownloadManager {
         context.startService(new Intent(context, DownLoadService.class));
     }
 
-    public synchronized static DownloadManager getInstance(Context context) {
-        if (mInstance == null) {
-            mInstance = new DownloadManager(context);
+    public static DownloadManager getInstance(Context context) {
+        if (instance == null) {
+            synchronized (DownloadManager.class) {
+                if (instance == null) {
+                    instance = new DownloadManager(context);
+                }
+            }
         }
-        return mInstance;
+        return instance;
     }
 
     public void down(DownLoadBean item) {
@@ -36,7 +42,7 @@ public class DownloadManager {
         context.startService(intent);
     }
 
-    public void delete(DownLoadBean item){
+    public void delete(DownLoadBean item) {
         Intent intent = new Intent(context, DownLoadService.class);
         intent.putExtra(Constants.KEY_DOWNLOAD_ENTRY, item);
         intent.putExtra(Constants.KEY_OPERATING_STATE, true);

@@ -16,6 +16,7 @@ import com.github.why168.filedownloader.DownloadManager;
 import com.github.why168.filedownloader.R;
 import com.github.why168.filedownloader.bean.DownLoadBean;
 import com.github.why168.filedownloader.constant.DownLoadState;
+import com.github.why168.filedownloader.db.DataBaseUtil;
 import com.github.why168.filedownloader.notify.DownLoadObservable;
 import com.github.why168.filedownloader.utlis.FileUtilities;
 
@@ -120,6 +121,19 @@ public class MainActivity extends AppCompatActivity implements Observer {
         collections.add(bean7);
         collections.add(bean8);
         collections.add(bean9);
+
+        ArrayList<DownLoadBean> downLoad = DataBaseUtil.getDownLoad(this);
+        for (int i = 0; i < downLoad.size(); i++) {
+            DownLoadBean beanI = downLoad.get(i);
+            for (int j = 0; j < collections.size(); j++) {
+                DownLoadBean beanJ = collections.get(j);
+                if (beanI.id.equals(beanJ.id)) {
+                    collections.set(j, beanI);
+                    break;
+                }
+            }
+        }
+
     }
 
     @Override
