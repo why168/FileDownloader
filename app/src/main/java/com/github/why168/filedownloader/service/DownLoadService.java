@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -47,8 +48,8 @@ public class DownLoadService extends Service {
 
     /**
      * 当下载状态发送改变的时候回调
-     */
-    private Handler handler = new Handler() {
+    */
+    private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -160,7 +161,7 @@ public class DownLoadService extends Service {
         try {
             DownLoadTask remove = mTaskMap.remove(item.id);
             if (remove != null) {
-                remove.cancle();
+                remove.cancel();
             } else {
                 mWaitingQueue.remove(item);
             }
@@ -206,7 +207,7 @@ public class DownLoadService extends Service {
         //TODO 2.TaskMap获取线程对象，移除线程;
         DownLoadTask downLoadTask = mTaskMap.get(loadBean.id);
         if (downLoadTask != null)
-            downLoadTask.cancle();
+            downLoadTask.cancel();
         mTaskMap.remove(loadBean.id);
 
         //TODO 3.状态修改成STATE_PAUSED;
@@ -237,7 +238,7 @@ public class DownLoadService extends Service {
         //TODO 1.TaskMap获取线程对象，移除线程;
         DownLoadTask downLoadTask = mTaskMap.get(loadBean.id);
         if (downLoadTask != null) {
-            downLoadTask.cancle();
+            downLoadTask.cancel();
             mTaskMap.remove(loadBean.id);
         } else {
             mWaitingQueue.remove(loadBean);

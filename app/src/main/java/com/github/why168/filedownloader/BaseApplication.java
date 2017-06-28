@@ -19,7 +19,6 @@ public class BaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mContext = this;
-
         //TODO 初始化DownLoad
         DownLoadConfig.getConfig().setMax_download_tasks(2);
     }

@@ -23,7 +23,13 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.DownLoadService" />
+        <service
+            android:name=".service.DownLoadService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <activity android:name=".activity.RecViewActivity" />
+        <activity android:name=".activity.ListViewActivity" />
     </application>
 
 </manifest>

@@ -130,7 +130,7 @@ public class DownLoadTask implements Runnable {
         return isPaused;
     }
 
-    public void cancle() {
+    public void cancel() {
         isPaused = true;
     }
     
