@@ -41,7 +41,6 @@ public class ConnectThread implements Runnable {
 
     @Override
     public void run() {
-        isRunning = true;
         bean.downloadState = DownLoadState.STATE_CONNECTION;
         HttpURLConnection connection = null;
         try {

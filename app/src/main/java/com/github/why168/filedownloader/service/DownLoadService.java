@@ -40,7 +40,7 @@ public class DownLoadService extends Service {
     /**
      * 用于记录所有下载的任务，方便在取消下载时，通过id能找到该任务进行删除
      */
-    private ConcurrentHashMap<String, DownLoadTask> mTaskMap = new ConcurrentHashMap<String, DownLoadTask>();
+    private ConcurrentHashMap<String, DownLoadTask> mTaskMap = new ConcurrentHashMap<>();
 
     private ThreadPoolExecutor downLoadExecutor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
@@ -48,7 +48,7 @@ public class DownLoadService extends Service {
 
     /**
      * 当下载状态发送改变的时候回调
-    */
+     */
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -271,6 +271,7 @@ public class DownLoadService extends Service {
     @Override
     public void onDestroy() {
         Log.e(TAG, "onDestroy");
+        handler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
 }

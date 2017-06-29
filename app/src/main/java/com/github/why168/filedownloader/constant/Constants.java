@@ -17,7 +17,7 @@ public class Constants {
     /**
      * 数据库名字
      */
-    public static final String DATA_BASE_DOWN = "Down_Demo";
+    public static final String DATA_BASE_DOWN = "file_downloader.db";
     /**
      * 默认地址
      */

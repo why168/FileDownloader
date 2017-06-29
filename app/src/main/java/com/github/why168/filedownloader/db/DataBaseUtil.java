@@ -44,7 +44,7 @@ public class DataBaseUtil {
                 bean.currentSize + "",
                 bean.isSupportRange ? 1 + "" : 0 + ""};
 
-        return new DownLoadDao(context).insert(true, table, titles, values);
+        return DBHelper.insertInfo(context, true, table, titles, values);
     }
 
     /**
@@ -52,7 +52,7 @@ public class DataBaseUtil {
      */
     public synchronized static DownLoadBean getDownLoadById(Context context, String DownloadID) {
         DownLoadBean bean = null;
-        Cursor cursor = new DownLoadDao(context).select(Constants.TABLE_DOWN,
+        Cursor cursor = DBHelper.selectInfo(context, Constants.TABLE_DOWN,
                 new String[]{"*"}, Constants.DOWN_ID + " = ? ",
                 new String[]{DownloadID}, null, null, null, null);
         if (cursor.moveToNext()) {
@@ -85,7 +85,7 @@ public class DataBaseUtil {
      */
     public synchronized static ArrayList<DownLoadBean> getDownLoad(Context context) {
         ArrayList<DownLoadBean> list = new ArrayList<DownLoadBean>();
-        Cursor cursor = new DownLoadDao(context).select(Constants.TABLE_DOWN, new String[]{"*"}, null, null, null, null, null, null);
+        Cursor cursor = DBHelper.selectInfo(context, Constants.TABLE_DOWN, new String[]{"*"}, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             DownLoadBean bean = new DownLoadBean();
             bean.id = cursor.getString(cursor
@@ -141,7 +141,7 @@ public class DataBaseUtil {
                 bean.isSupportRange + ""};
 
 
-        new DownLoadDao(context).update(true, Constants.TABLE_DOWN, titles, values, Constants.DOWN_ID + " =? ", new String[]{bean.id});
+        DBHelper.updateInfo(context, true, Constants.TABLE_DOWN, titles, values, Constants.DOWN_ID + " =? ", new String[]{bean.id});
     }
 
     /**
@@ -149,7 +149,7 @@ public class DataBaseUtil {
      */
     public synchronized static void DeleteDownLoadById(Context context, String id) {
         if (!TextUtils.isEmpty(id)) {
-            new DownLoadDao(context).delete(true, Constants.TABLE_DOWN, Constants.DOWN_ID + " =? ", new String[]{id});
+            DBHelper.deleteInfo(context, true, Constants.TABLE_DOWN, Constants.DOWN_ID + " =? ", new String[]{id});
         }
     }
 
