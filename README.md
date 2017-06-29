@@ -3,7 +3,6 @@
 * 断点续传
 * 支持线程数控制
 
-本人能力有限，暂时不能更新了，等有时间再深入多线程Service研究。
 
 ### 效果图 
 ![Image of 示例](https://raw.githubusercontent.com/why168/FileDownloader/master/Art/down.gif)
@@ -443,7 +442,7 @@ public class DownLoadTask implements Runnable {
 <br>
 <br>
 
-##MIT License
+## MIT License
 
 ```
 MIT License
