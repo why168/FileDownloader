@@ -1,4 +1,4 @@
-package com.github.why168.filedownloader.utlis;
+package com.github.why168.multifiledownloader.utlis;
 
 import android.os.Environment;
 

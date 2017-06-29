@@ -1,4 +1,4 @@
-package com.github.why168.filedownloader.service;
+package com.github.why168.multifiledownloader;
 
 import android.app.Service;
 import android.content.Intent;
@@ -6,36 +6,25 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.github.why168.filedownloader.BaseApplication;
-import com.github.why168.filedownloader.bean.DownLoadBean;
-import com.github.why168.filedownloader.constant.Constants;
-import com.github.why168.filedownloader.constant.DownLoadState;
-import com.github.why168.filedownloader.db.DataBaseUtil;
-import com.github.why168.filedownloader.notify.DownLoadObservable;
-import com.github.why168.filedownloader.runnable.ConnectThread;
-import com.github.why168.filedownloader.runnable.DownLoadTask;
-import com.github.why168.filedownloader.utlis.DownLoadConfig;
+import com.github.why168.multifiledownloader.db.DataBaseUtil;
+import com.github.why168.multifiledownloader.notify.DownLoadObservable;
+import com.github.why168.multifiledownloader.utlis.DownLoadConfig;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.github.why168.filedownloader.constant.DownLoadState.STATE_DELETE;
-import static com.github.why168.filedownloader.constant.DownLoadState.STATE_DOWNLOADED;
+import static com.github.why168.multifiledownloader.DownLoadState.STATE_DELETE;
+import static com.github.why168.multifiledownloader.DownLoadState.STATE_DOWNLOADED;
 
-/**
- * 下载服务
- *
- * @author Edwin.Wu
- * @version 2017/1/12 10:43
- * @since JDK1.8
- */
+
 public class DownLoadService extends Service {
+    public DownLoadService() {
+    }
+
     private String TAG = DownLoadService.this.getClass().getName();
     /**
      * 用于记录所有下载的任务，方便在取消下载时，通过id能找到该任务进行删除
@@ -85,7 +74,6 @@ public class DownLoadService extends Service {
         handler.sendMessage(message);
     }
 
-
     /**
      * 下载
      *
@@ -119,20 +107,18 @@ public class DownLoadService extends Service {
             case DownLoadState.STATE_ERROR://下载失败
                 downError(loadBean);
                 break;
-            case STATE_DOWNLOADED://下载完毕
-                Toast.makeText(BaseApplication.mContext, loadBean.appName + "->下载完毕", Toast.LENGTH_SHORT).show();
+            case DownLoadState.STATE_DOWNLOADED://下载完毕
+                Log.e("Edwin", "----" + loadBean.appName + "->下载完毕");
                 break;
             default:
                 break;
         }
     }
 
-
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.e(TAG, "IBinder");
-        return null;
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override

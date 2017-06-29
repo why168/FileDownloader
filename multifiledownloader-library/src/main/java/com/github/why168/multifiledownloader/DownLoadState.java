@@ -1,4 +1,4 @@
-package com.github.why168.filedownloader.constant;
+package com.github.why168.multifiledownloader;
 
 /**
  * 下载状态

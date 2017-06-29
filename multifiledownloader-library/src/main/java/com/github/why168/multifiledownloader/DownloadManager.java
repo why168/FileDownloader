@@ -1,11 +1,7 @@
-package com.github.why168.filedownloader;
+package com.github.why168.multifiledownloader;
 
 import android.content.Context;
 import android.content.Intent;
-
-import com.github.why168.filedownloader.bean.DownLoadBean;
-import com.github.why168.filedownloader.constant.Constants;
-import com.github.why168.filedownloader.service.DownLoadService;
 
 /**
  * DownloadManager

@@ -1,24 +1,23 @@
-package com.github.why168.filedownloader.activity;
+package com.github.why168.filedownloader;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.github.why168.filedownloader.DownloadManager;
-import com.github.why168.filedownloader.R;
-import com.github.why168.filedownloader.bean.DownLoadBean;
-import com.github.why168.filedownloader.constant.DownLoadState;
-import com.github.why168.filedownloader.db.DataBaseUtil;
-import com.github.why168.filedownloader.notify.DownLoadObservable;
-import com.github.why168.filedownloader.utlis.FileUtilities;
+import com.github.why168.multifiledownloader.DownLoadBean;
+import com.github.why168.multifiledownloader.DownLoadState;
+import com.github.why168.multifiledownloader.DownloadManager;
+import com.github.why168.multifiledownloader.db.DataBaseUtil;
+import com.github.why168.multifiledownloader.notify.DownLoadObservable;
+import com.github.why168.multifiledownloader.utlis.FileUtilities;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,30 +25,25 @@ import java.util.Observable;
 import java.util.Observer;
 
 /**
- * RecViewActivity
+ * ListViewActivity
  *
  * @author Edwin.Wu
- * @version 2017/6/28 15:34
+ * @version 2017/6/28 16:37
  * @since JDK1.8
  */
-public class RecViewActivity extends AppCompatActivity implements Observer {
-    private ArrayList<DownLoadBean> collections;
-    private LayoutInflater mLayoutInflater;
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter viewAdapter;
+public class ListViewActivity extends AppCompatActivity implements Observer {
     private DownloadManager mDownloadManager;
+    private ArrayList<DownLoadBean> collections;
+    private ListView mListView;
+    private ViewAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_rec_view);
-
-        mLayoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        recyclerView = (RecyclerView) findViewById(R.id.recView);
+        setContentView(R.layout.activity_list_view);
+        mListView = (ListView) findViewById(R.id.listView);
         initData();
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(viewAdapter = new ViewAdapter());
+        mListView.setAdapter(adapter = new ViewAdapter());
     }
 
     private void initData() {
@@ -142,12 +136,9 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
         Log.i("Edwin", "index = " + index + " bean = " + bean.toString());
         int downloadState = bean.downloadState;
 
-        if (index != -1 && isCurrentListViewItemVisible(index)) {
+        if (index != -1) {
             if (downloadState == DownLoadState.STATE_DELETE) {
-                viewAdapter.notifyItemRemoved(index);
                 collections.remove(index);
-                if (index != collections.size())
-                    notifyChange(bean, index);
                 try {
                     File file = new File(bean.path);
                     boolean delete = file.delete();
@@ -155,69 +146,13 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                adapter.notifyDataSetChanged();
             } else {
                 collections.set(index, bean);
-                notifyChange(bean, index);
+                updateItem(index, bean);
             }
+
         }
-    }
-
-
-    /**
-     * 数据改变
-     *
-     * @param bean
-     * @param index
-     */
-    private void notifyChange(final DownLoadBean bean, int index) {
-        ViewHolder holder = getViewHolder(index);
-
-        switch (bean.downloadState) {
-            case DownLoadState.STATE_NONE:
-                holder.button_start.setText("点击下载");
-                break;
-            case DownLoadState.STATE_WAITING:
-                //TODO 等待下载 改成 排队下载
-                holder.button_start.setText("排队下载");
-                break;
-            case DownLoadState.STATE_DOWNLOADING:
-                //TODO 下载中 改成 正在下载
-                holder.button_start.setText("正在下载");
-                break;
-            case DownLoadState.STATE_PAUSED:
-                //TODO 暂停下载 换成 继续下载
-                holder.button_start.setText("继续下载");
-                break;
-            case DownLoadState.STATE_DOWNLOADED:
-                holder.button_start.setText("下载完毕");
-                break;
-            case DownLoadState.STATE_ERROR:
-                holder.button_start.setText("下载错误");
-                break;
-            case DownLoadState.STATE_CONNECTION:
-                holder.button_start.setText("连接中");
-                break;
-        }
-
-        holder.button_delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDownloadManager.delete(bean);
-            }
-        });
-
-        holder.button_start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDownloadManager.down(bean);
-            }
-        });
-
-        holder.text_name.setText(bean.appName);
-        holder.text_range.setText(String.valueOf(bean.isSupportRange));
-        holder.text_progress.setText(FileUtilities.convertFileSize(bean.currentSize) + "/" + FileUtilities.convertFileSize(bean.totalSize));
-        holder.progressBar.setMax((int) bean.totalSize);
-        holder.progressBar.setProgress((int) bean.currentSize);
     }
 
     @Override
@@ -232,28 +167,20 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
         DownLoadObservable.getInstance().deleteObserver(this);
     }
 
-    private class ViewAdapter extends RecyclerView.Adapter<ViewHolder> {
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ViewHolder(mLayoutInflater.inflate(R.layout.item_down, parent, false));
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            final DownLoadBean bean = collections.get(position);
-            holder.text_name.setText(bean.appName);
-
+    public void updateItem(int position, final DownLoadBean bean) {
+        int firstvisible = mListView.getFirstVisiblePosition();
+        int lastvisibale = mListView.getLastVisiblePosition();
+        if (position >= firstvisible && position <= lastvisibale) {
+            View view = mListView.getChildAt(position - firstvisible);
+            ViewHolder holder = (ViewHolder) view.getTag();
+            //然后使用viewholder去更新需要更新的view。
             switch (bean.downloadState) {
                 case DownLoadState.STATE_NONE:
                     holder.button_start.setText("点击下载");
                     break;
                 case DownLoadState.STATE_WAITING:
-                    holder.button_start.setText("等待下载");
+                    //TODO 等待下载 改成 排队下载
+                    holder.button_start.setText("排队下载");
                     break;
                 case DownLoadState.STATE_DOWNLOADING:
                     //TODO 下载中 改成 正在下载
@@ -288,19 +215,102 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
                 }
             });
 
+            holder.text_name.setText(bean.appName);
             holder.text_range.setText(String.valueOf(bean.isSupportRange));
             holder.text_progress.setText(FileUtilities.convertFileSize(bean.currentSize) + "/" + FileUtilities.convertFileSize(bean.totalSize));
             holder.progressBar.setMax((int) bean.totalSize);
             holder.progressBar.setProgress((int) bean.currentSize);
         }
 
+    }
+
+    private class ViewAdapter extends BaseAdapter {
+
         @Override
-        public int getItemCount() {
+        public int getCount() {
             return collections.size();
+        }
+
+        @Override
+        public DownLoadBean getItem(int position) {
+            return collections.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, android.view.View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView == null) {
+                convertView = LinearLayout.inflate(ListViewActivity.this, R.layout.item_down, null);
+                viewHolder = new ViewHolder(convertView);
+                viewHolder.text_name = (TextView) convertView.findViewById(R.id.text_name);
+                viewHolder.button_start = (Button) convertView.findViewById(R.id.button_start);
+                viewHolder.button_delete = (Button) convertView.findViewById(R.id.button_delete);
+                viewHolder.text_progress = (TextView) convertView.findViewById(R.id.text_progress);
+                viewHolder.progressBar = (ProgressBar) convertView.findViewById(R.id.progressBar);
+                viewHolder.text_range = (TextView) convertView.findViewById(R.id.text_range);
+                convertView.setTag(viewHolder);
+
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+
+            final DownLoadBean bean = collections.get(position);
+            viewHolder.text_name.setText(bean.appName);
+
+            switch (bean.downloadState) {
+                case DownLoadState.STATE_NONE:
+                    viewHolder.button_start.setText("点击下载");
+                    break;
+                case DownLoadState.STATE_WAITING:
+                    viewHolder.button_start.setText("等待下载");
+                    break;
+                case DownLoadState.STATE_DOWNLOADING:
+                    //TODO 下载中 改成 正在下载
+                    viewHolder.button_start.setText("正在下载");
+                    break;
+                case DownLoadState.STATE_PAUSED:
+                    //TODO 暂停下载 换成 继续下载
+                    viewHolder.button_start.setText("继续下载");
+                    break;
+                case DownLoadState.STATE_DOWNLOADED:
+                    viewHolder.button_start.setText("下载完毕");
+                    break;
+                case DownLoadState.STATE_ERROR:
+                    viewHolder.button_start.setText("下载错误");
+                    break;
+                case DownLoadState.STATE_CONNECTION:
+                    viewHolder.button_start.setText("连接中");
+                    break;
+            }
+
+            viewHolder.button_delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDownloadManager.delete(bean);
+                }
+            });
+
+            viewHolder.button_start.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDownloadManager.down(bean);
+                }
+            });
+            viewHolder.text_range.setText(String.valueOf(bean.isSupportRange));
+            viewHolder.text_progress.setText(FileUtilities.convertFileSize(bean.currentSize) + "/" + FileUtilities.convertFileSize(bean.totalSize));
+            viewHolder.progressBar.setMax((int) bean.totalSize);
+            viewHolder.progressBar.setProgress((int) bean.currentSize);
+
+            return convertView;
         }
     }
 
-    final static class ViewHolder extends RecyclerView.ViewHolder {
+    private static class ViewHolder {
         TextView text_name;
         Button button_start;
         Button button_delete;
@@ -309,7 +319,6 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
         TextView text_range;
 
         ViewHolder(View itemView) {
-            super(itemView);
             text_name = (TextView) itemView.findViewById(R.id.text_name);
             button_start = (Button) itemView.findViewById(R.id.button_start);
             button_delete = (Button) itemView.findViewById(R.id.button_delete);
@@ -317,16 +326,5 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
             progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
             text_range = (TextView) itemView.findViewById(R.id.text_range);
         }
-    }
-
-    private ViewHolder getViewHolder(int position) {
-        return (ViewHolder) recyclerView.findViewHolderForLayoutPosition(position);
-    }
-
-    private boolean isCurrentListViewItemVisible(int position) {
-        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        int first = layoutManager.findFirstVisibleItemPosition();
-        int last = layoutManager.findLastVisibleItemPosition();
-        return first <= position && position <= last;
     }
 }

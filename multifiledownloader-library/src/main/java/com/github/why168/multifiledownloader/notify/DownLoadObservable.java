@@ -1,8 +1,8 @@
-package com.github.why168.filedownloader.notify;
+package com.github.why168.multifiledownloader.notify;
 
 import android.util.Log;
 
-import com.github.why168.filedownloader.bean.DownLoadBean;
+import com.github.why168.multifiledownloader.DownLoadBean;
 
 import java.util.Observable;
 

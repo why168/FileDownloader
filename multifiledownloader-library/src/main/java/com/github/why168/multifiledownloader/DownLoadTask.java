@@ -1,15 +1,12 @@
-package com.github.why168.filedownloader.runnable;
+package com.github.why168.multifiledownloader;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.github.why168.filedownloader.bean.DownLoadBean;
-import com.github.why168.filedownloader.constant.Constants;
-import com.github.why168.filedownloader.constant.DownLoadState;
-import com.github.why168.filedownloader.db.DataBaseUtil;
-import com.github.why168.filedownloader.utlis.FileUtilities;
+import com.github.why168.multifiledownloader.db.DataBaseUtil;
+import com.github.why168.multifiledownloader.utlis.FileUtilities;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,7 +16,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.github.why168.filedownloader.constant.DownLoadState.STATE_DOWNLOADED;
 
 /**
  * @author Edwin.Wu
@@ -119,9 +115,9 @@ public class DownLoadTask implements Runnable {
 
         //TODO 判断是否下载完成
         if (bean.currentSize == bean.totalSize) {
-            bean.downloadState = STATE_DOWNLOADED;
+            bean.downloadState = DownLoadState.STATE_DOWNLOADED;
             DataBaseUtil.UpdateDownLoadById(context, bean);
-            notifyDownloadStateChanged(bean, STATE_DOWNLOADED);
+            notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADED);
         }
     }
 
@@ -133,7 +129,7 @@ public class DownLoadTask implements Runnable {
     public void cancel() {
         isPaused = true;
     }
-    
+
     /**
      * 当下载状态发送改变的时候调用
      */

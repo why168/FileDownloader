@@ -1,5 +1,5 @@
-package com.github.why168.filedownloader.bean;
-import com.github.why168.filedownloader.constant.DownLoadState;
+package com.github.why168.multifiledownloader;
+
 import java.io.Serializable;
 
 /**

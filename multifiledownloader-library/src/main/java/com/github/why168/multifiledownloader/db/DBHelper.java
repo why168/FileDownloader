@@ -1,4 +1,4 @@
-package com.github.why168.filedownloader.db;
+package com.github.why168.multifiledownloader.db;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.github.why168.filedownloader.constant.Constants;
+import com.github.why168.multifiledownloader.Constants;
 
 /**
  * 数据库

@@ -5,6 +5,6 @@
     android:id="@+id/recView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.github.why168.filedownloader.activity.RecViewActivity">
+    tools:context="com.github.why168.filedownloader.RecViewActivity">
 
 </android.support.v7.widget.RecyclerView>

@@ -1,11 +1,9 @@
-package com.github.why168.filedownloader.activity;
+package com.github.why168.filedownloader;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-
-import com.github.why168.filedownloader.R;
 
 
 /**

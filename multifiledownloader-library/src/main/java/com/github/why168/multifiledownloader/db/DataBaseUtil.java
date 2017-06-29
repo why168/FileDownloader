@@ -1,13 +1,14 @@
-package com.github.why168.filedownloader.db;
+package com.github.why168.multifiledownloader.db;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.text.TextUtils;
 
-import com.github.why168.filedownloader.bean.DownLoadBean;
-import com.github.why168.filedownloader.constant.Constants;
+import com.github.why168.multifiledownloader.Constants;
+import com.github.why168.multifiledownloader.DownLoadBean;
 
 import java.util.ArrayList;
+
 
 /**
  * 数据操作工具类

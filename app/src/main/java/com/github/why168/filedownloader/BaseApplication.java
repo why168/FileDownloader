@@ -3,7 +3,7 @@ package com.github.why168.filedownloader;
 import android.app.Application;
 import android.content.Context;
 
-import com.github.why168.filedownloader.utlis.DownLoadConfig;
+import com.github.why168.multifiledownloader.utlis.DownLoadConfig;
 
 /**
  * Application

@@ -1,14 +1,11 @@
-package com.github.why168.filedownloader.runnable;
+package com.github.why168.multifiledownloader;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.github.why168.filedownloader.bean.DownLoadBean;
-import com.github.why168.filedownloader.constant.Constants;
-import com.github.why168.filedownloader.constant.DownLoadState;
-import com.github.why168.filedownloader.db.DataBaseUtil;
+import com.github.why168.multifiledownloader.db.DataBaseUtil;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;

@@ -1,4 +1,4 @@
-package com.github.why168.filedownloader;
+package com.github.why168.multifiledownloader;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
