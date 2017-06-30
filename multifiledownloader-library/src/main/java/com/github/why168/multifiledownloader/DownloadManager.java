@@ -11,7 +11,6 @@ import android.content.Intent;
  * @since JDK1.8
  */
 public class DownloadManager {
-
     private static DownloadManager instance;
     private final Context context;
 
@@ -34,7 +33,8 @@ public class DownloadManager {
 
     public void down(DownLoadBean item) {
         Intent intent = new Intent(context, DownLoadService.class);
-        intent.setAction("com.github.why168.multifiledownloader.service");
+        intent.setAction("com.github.why168.multifiledownloader.downloadservice");
+        intent.setPackage("com.github.why168.multifiledownloader");
         intent.putExtra(Constants.KEY_DOWNLOAD_ENTRY, item);
         intent.putExtra(Constants.KEY_OPERATING_STATE, false);
         context.startService(intent);
@@ -42,7 +42,8 @@ public class DownloadManager {
 
     public void delete(DownLoadBean item) {
         Intent intent = new Intent(context, DownLoadService.class);
-        intent.setAction("com.github.why168.multifiledownloader.service");
+        intent.setAction("com.github.why168.multifiledownloader.downloadservice");
+        intent.setPackage("com.github.why168.multifiledownloader");
         intent.putExtra(Constants.KEY_DOWNLOAD_ENTRY, item);
         intent.putExtra(Constants.KEY_OPERATING_STATE, true);
         context.startService(intent);

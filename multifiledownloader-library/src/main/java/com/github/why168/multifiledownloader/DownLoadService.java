@@ -21,19 +21,23 @@ import static com.github.why168.multifiledownloader.DownLoadState.STATE_DOWNLOAD
 
 public class DownLoadService extends Service {
     private String TAG = DownLoadService.this.getClass().getName();
+    private DownLoadExecutors downLoadExecutors;
     private ThreadPoolExecutor downLoadExecutor;
-    private ConcurrentHashMap<String, DownLoadTask> mTaskMap;
+    private ConcurrentHashMap<String, AsyncDownCall> mTaskMap;
     private LinkedBlockingDeque<DownLoadBean> mWaitingQueue;
 
     public DownLoadService() {
+        Log.e(TAG, "DownLoadService");
+        downLoadExecutors = new DownLoadExecutors();
+        downLoadExecutor = new DownLoadExecutors().executorService();
+        mTaskMap = new ConcurrentHashMap<>();
+        mWaitingQueue = new LinkedBlockingDeque<>();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        downLoadExecutor = new DownLoadExecutors().executorService();
-        mTaskMap = new ConcurrentHashMap<>();
-        mWaitingQueue = new LinkedBlockingDeque<>();
+        Log.e(TAG, "DownLoadService --- onCreate");
     }
 
     /**
@@ -126,19 +130,17 @@ public class DownLoadService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "onStartCommand");
         try {
-            if (intent.getAction() != null) {
-                if ("com.github.why168.multifiledownloader.service".equalsIgnoreCase(intent.getAction())) {
-                    //TODO 执行
-                    DownLoadBean bean = (DownLoadBean) intent.getSerializableExtra(Constants.KEY_DOWNLOAD_ENTRY);
-                    if (bean != null) {
-                        boolean booleanExtra = intent.getBooleanExtra(Constants.KEY_OPERATING_STATE, false);
-                        if (booleanExtra) {
-                            //TODO 删除下载
-                            deleteDownTask(bean);
-                        } else {
-                            //TODO 开始下载
-                            download(bean);
-                        }
+            if (intent.getAction() != null && "com.github.why168.multifiledownloader.downloadservice".equalsIgnoreCase(intent.getAction())) {
+                //TODO 执行
+                DownLoadBean bean = (DownLoadBean) intent.getSerializableExtra(Constants.KEY_DOWNLOAD_ENTRY);
+                if (bean != null) {
+                    boolean booleanExtra = intent.getBooleanExtra(Constants.KEY_OPERATING_STATE, false);
+                    if (booleanExtra) {
+                        //TODO 删除下载
+                        deleteDownTask(bean);
+                    } else {
+                        //TODO 开始下载
+                        download(bean);
                     }
                 }
                 return START_STICKY;
@@ -154,7 +156,7 @@ public class DownLoadService extends Service {
     public void deleteDownTask(DownLoadBean item) {
         //TODO 删除文件，删除数据库
         try {
-            DownLoadTask remove = mTaskMap.remove(item.id);
+            AsyncDownCall remove = mTaskMap.remove(item.id);
             if (remove != null) {
                 remove.cancel();
             } else {
@@ -170,24 +172,21 @@ public class DownLoadService extends Service {
 
     private void downNone(DownLoadBean loadBean) {
         //TODO 最最最--->先判断任务数是否
-        if (mTaskMap.size() >= DownLoadConfig.getConfig().getMax_download_tasks()) {
+        if (mTaskMap.size() >= DownLoadConfig.getConfig().getMaxTasks()) {
             mWaitingQueue.offer(loadBean);
             loadBean.downloadState = DownLoadState.STATE_WAITING;
-
             //TODO 更新数据库
             DataBaseUtil.UpdateDownLoadById(this, loadBean);
-
             //TODO 每次状态发生改变，都需要回调该方法通知所有观察者
             notifyDownloadStateChanged(loadBean, DownLoadState.STATE_WAITING);
         } else {
             if (loadBean.totalSize <= 0) {
-                ConnectThread connectThread = new ConnectThread(this, handler, mTaskMap, downLoadExecutor, loadBean);
+                AsyncConnectCall connectThread = new AsyncConnectCall(this, handler, mTaskMap, downLoadExecutor, loadBean);
                 downLoadExecutor.execute(connectThread);
             } else {
-                DownLoadTask downLoadTask = new DownLoadTask(this,
-                        handler, mTaskMap, loadBean);
+                AsyncDownCall downLoadTask = new AsyncDownCall(this, handler, loadBean);
                 mTaskMap.put(loadBean.id, downLoadTask);
-                downLoadExecutor.execute(downLoadTask);
+                downLoadExecutors.execute(downLoadTask);
             }
         }
     }
@@ -201,7 +200,7 @@ public class DownLoadService extends Service {
         Log.e("Edwin", "mWaitingQueue size = " + mWaitingQueue.size());
 
         //TODO 2.TaskMap获取线程对象，移除线程;
-        DownLoadTask downLoadTask = mTaskMap.get(loadBean.id);
+        AsyncDownCall downLoadTask = mTaskMap.get(loadBean.id);
         if (downLoadTask != null)
             downLoadTask.cancel();
         mTaskMap.remove(loadBean.id);
@@ -232,7 +231,7 @@ public class DownLoadService extends Service {
      */
     private void downLoading(DownLoadBean loadBean) {
         //TODO 1.TaskMap获取线程对象，移除线程;
-        DownLoadTask downLoadTask = mTaskMap.get(loadBean.id);
+        AsyncDownCall downLoadTask = mTaskMap.get(loadBean.id);
         if (downLoadTask != null) {
             downLoadTask.cancel();
             mTaskMap.remove(loadBean.id);

@@ -11,7 +11,7 @@ public class DownLoadConfig {
     /**
      * 下载的任务数
      */
-    private int max_download_tasks = 3;
+    private int maxTasks = 3;
 
     private DownLoadConfig() {
 
@@ -25,11 +25,11 @@ public class DownLoadConfig {
         return DownLoadConfig.Instance.instance;
     }
 
-    public int getMax_download_tasks() {
-        return max_download_tasks;
+    public int getMaxTasks() {
+        return maxTasks;
     }
 
-    public void setMax_download_tasks(int max_download_tasks) {
-        this.max_download_tasks = max_download_tasks;
+    public void setMaxTasks(int maxTasks) {
+        this.maxTasks = maxTasks;
     }
 }

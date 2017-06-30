@@ -1,5 +1,6 @@
 package com.github.why168.multifiledownloader;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -10,6 +11,8 @@ import com.github.why168.multifiledownloader.db.DataBaseUtil;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,15 +24,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @version 2017/1/16 14:15
  * @since JDK1.8
  */
-public class ConnectThread implements Runnable {
+public class AsyncConnectCall extends NickRunnable {
     private final Context context;
     private final Handler handler;
-    private final ConcurrentHashMap<String, DownLoadTask> mTaskMap;
+    private final ConcurrentHashMap<String, AsyncDownCall> mTaskMap;
     private final ExecutorService executorService;
     private DownLoadBean bean;
     private AtomicBoolean isRunning;
 
-    public ConnectThread(Context context, Handler handler, ConcurrentHashMap<String, DownLoadTask> mTaskMap, ExecutorService executorService, DownLoadBean bean) {
+    @SuppressLint("SimpleDateFormat")
+    public AsyncConnectCall(Context context, Handler handler,
+                            ConcurrentHashMap<String, AsyncDownCall> mTaskMap,
+                            ExecutorService executorService, DownLoadBean bean) {
+        super("AndroidHttp %s", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(Calendar.getInstance().getTime()));
         this.context = context;
         this.handler = handler;
         this.mTaskMap = mTaskMap;
@@ -38,9 +45,13 @@ public class ConnectThread implements Runnable {
         this.isRunning = new AtomicBoolean(true);
     }
 
+
     @Override
-    public void run() {
+    protected void execute() {
         bean.downloadState = DownLoadState.STATE_CONNECTION;
+        DataBaseUtil.UpdateDownLoadById(context, bean);
+        notifyDownloadStateChanged(bean, DownLoadState.STATE_CONNECTION);
+
         HttpURLConnection connection = null;
         try {
             connection = (HttpURLConnection) new URL(bean.url).openConnection();
@@ -59,12 +70,12 @@ public class ConnectThread implements Runnable {
                 bean.downloadState = DownLoadState.STATE_ERROR;
             }
 
-            DataBaseUtil.UpdateDownLoadById(context, bean);
-            notifyDownloadStateChanged(bean, DownLoadState.STATE_CONNECTION);
+//            DataBaseUtil.UpdateDownLoadById(context, bean);
+//            notifyDownloadStateChanged(bean, DownLoadState.STATE_CONNECTION);
             Log.i("Edwin", "连接成功--isSupportRange = " + bean.isSupportRange);
 
             //TODO 开始下载咯
-            DownLoadTask downLoadTask = new DownLoadTask(context, handler, mTaskMap, bean);
+            AsyncDownCall downLoadTask = new AsyncDownCall(context, handler, bean);
             mTaskMap.put(bean.id, downLoadTask);
             executorService.execute(downLoadTask);
         } catch (IOException e) {

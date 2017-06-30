@@ -1,5 +1,6 @@
 package com.github.why168.multifiledownloader;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -15,33 +16,36 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.ConcurrentHashMap;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
+ * 文件下载
+ *
  * @author Edwin.Wu
  * @version 2017/1/16 14:17
  * @since JDK1.8
  */
-public class DownLoadTask implements Runnable {
+public class AsyncDownCall extends NickRunnable {
     private final Context context;
     private final Handler handler;
-    private final ConcurrentHashMap<String, DownLoadTask> mTaskMap;
     private DownLoadBean bean;
     private AtomicBoolean isPaused;
 
-    public DownLoadTask(Context context, Handler handler, ConcurrentHashMap<String, DownLoadTask> mTaskMap, DownLoadBean loadBean) {
+    @SuppressLint("SimpleDateFormat")
+    public AsyncDownCall(Context context, Handler handler, DownLoadBean loadBean) {
+        super("AndroidHttp %s", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(Calendar.getInstance().getTime()));
         this.context = context;
         this.handler = handler;
-        this.mTaskMap = mTaskMap;
         this.bean = loadBean;
         this.isPaused = new AtomicBoolean(false);
     }
 
 
     @Override
-    public void run() {
+    public void execute() {
         RandomAccessFile raf = null;
         FileOutputStream fos = null;
         InputStream is = null;
@@ -135,12 +139,13 @@ public class DownLoadTask implements Runnable {
         }
     }
 
+
     public boolean isCanceled() {
         return isPaused.get();
     }
 
     public void cancel() {
-        isPaused.set(false);
+        isPaused.set(true);
     }
 
     /**

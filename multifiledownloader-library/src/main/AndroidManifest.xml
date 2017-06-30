@@ -12,7 +12,7 @@
             android:enabled="true"
             android:exported="false">
             <intent-filter android:priority="0x7fffffff">
-                <action android:name="com.github.why168.multifiledownloader.service" />
+                <action android:name="com.github.why168.multifiledownloader.downloadservice" />
             </intent-filter>
         </service>
     </application>
