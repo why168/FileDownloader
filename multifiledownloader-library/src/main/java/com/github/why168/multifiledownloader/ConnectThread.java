@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 连接的线程
@@ -26,7 +27,7 @@ public class ConnectThread implements Runnable {
     private final ConcurrentHashMap<String, DownLoadTask> mTaskMap;
     private final ExecutorService executorService;
     private DownLoadBean bean;
-    private volatile boolean isRunning = true;
+    private AtomicBoolean isRunning;
 
     public ConnectThread(Context context, Handler handler, ConcurrentHashMap<String, DownLoadTask> mTaskMap, ExecutorService executorService, DownLoadBean bean) {
         this.context = context;
@@ -34,6 +35,7 @@ public class ConnectThread implements Runnable {
         this.mTaskMap = mTaskMap;
         this.executorService = executorService;
         this.bean = bean;
+        this.isRunning = new AtomicBoolean(true);
     }
 
     @Override
@@ -49,7 +51,7 @@ public class ConnectThread implements Runnable {
             int contentLength = connection.getContentLength();
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 String ranges = connection.getHeaderField("Accept-Ranges");
-                if ("bytes".equals(ranges)) {
+                if ("bytes".equalsIgnoreCase(ranges)) {
                     bean.isSupportRange = true;
                 }
                 bean.totalSize = contentLength;
@@ -65,10 +67,9 @@ public class ConnectThread implements Runnable {
             DownLoadTask downLoadTask = new DownLoadTask(context, handler, mTaskMap, bean);
             mTaskMap.put(bean.id, downLoadTask);
             executorService.execute(downLoadTask);
-
         } catch (IOException e) {
-            isRunning = false;
             e.printStackTrace();
+            isRunning.set(false);
             bean.downloadState = DownLoadState.STATE_ERROR;
             DataBaseUtil.UpdateDownLoadById(context, bean);
             notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
@@ -81,14 +82,12 @@ public class ConnectThread implements Runnable {
     }
 
 
-    public boolean isRunning() {
-        return isRunning;
+    public boolean isCanceled() {
+        return isRunning.get();
     }
 
     public void cancel() {
-        Log.i("Edwin", "No---Thread.currentThread() = " + Thread.currentThread().getName());
-        isRunning = true;
-        Thread.currentThread().interrupt();
+        isRunning.set(true);
     }
 
     /**

@@ -118,6 +118,7 @@ public class DataBaseUtil {
      * 修改下载数据库
      */
     public synchronized static void UpdateDownLoadById(Context context, DownLoadBean bean) {
+
         /** 字段名对应字段值 **/
         String[] titles = new String[]{
                 Constants.DOWN_ID,
@@ -140,7 +141,6 @@ public class DataBaseUtil {
                 bean.totalSize + "",
                 bean.currentSize + "",
                 bean.isSupportRange + ""};
-
 
         DBHelper.updateInfo(context, true, Constants.TABLE_DOWN, titles, values, Constants.DOWN_ID + " =? ", new String[]{bean.id});
     }

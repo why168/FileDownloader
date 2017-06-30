@@ -10,11 +10,13 @@ import com.github.why168.multifiledownloader.utlis.FileUtilities;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -27,18 +29,23 @@ public class DownLoadTask implements Runnable {
     private final Handler handler;
     private final ConcurrentHashMap<String, DownLoadTask> mTaskMap;
     private DownLoadBean bean;
-    private volatile boolean isPaused = false;
+    private AtomicBoolean isPaused;
 
     public DownLoadTask(Context context, Handler handler, ConcurrentHashMap<String, DownLoadTask> mTaskMap, DownLoadBean loadBean) {
         this.context = context;
         this.handler = handler;
         this.mTaskMap = mTaskMap;
         this.bean = loadBean;
+        this.isPaused = new AtomicBoolean(false);
     }
 
 
     @Override
     public void run() {
+        RandomAccessFile raf = null;
+        FileOutputStream fos = null;
+        InputStream is = null;
+
         File destFile = FileUtilities.getDownloadFile(bean.url);
         bean.path = destFile.getPath();
         HttpURLConnection connection = null;
@@ -55,9 +62,6 @@ public class DownLoadTask implements Runnable {
             int contentLength = connection.getContentLength();
 
 
-            RandomAccessFile raf = null;
-            FileOutputStream fos = null;
-            InputStream is = null;
             if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
                 Log.e("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_PARTIAL);
                 raf = new RandomAccessFile(destFile, "rw");
@@ -66,16 +70,14 @@ public class DownLoadTask implements Runnable {
                 byte[] buffer = new byte[2048];
                 int len = -1;
                 while ((len = is.read(buffer)) != -1) {
-                    if (isPaused) {
+                    if (isPaused.get())
                         break;
-                    }
+
                     raf.write(buffer, 0, len);
                     bean.currentSize += len;
                     DataBaseUtil.UpdateDownLoadById(context, bean);
                     notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
                 }
-                raf.close();
-                is.close();
             } else if (responseCode == HttpURLConnection.HTTP_OK) {
                 Log.e("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_OK);
                 bean.currentSize = 0;
@@ -84,7 +86,7 @@ public class DownLoadTask implements Runnable {
                 byte[] buffer = new byte[2048];
                 int len = -1;
                 while ((len = is.read(buffer)) != -1) {
-                    if (isPaused) {
+                    if (isPaused.get()) {
                         break;
                     }
                     fos.write(buffer, 0, len);
@@ -92,16 +94,14 @@ public class DownLoadTask implements Runnable {
                     DataBaseUtil.UpdateDownLoadById(context, bean);
                     notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
                 }
-                fos.close();
-                is.close();
+                fos.flush();
             } else {
                 bean.downloadState = DownLoadState.STATE_ERROR;
                 DataBaseUtil.UpdateDownLoadById(context, bean);
                 notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
             }
 
-
-            if (isPaused) {
+            if (isPaused.get()) {
                 bean.downloadState = DownLoadState.STATE_PAUSED;
                 DataBaseUtil.UpdateDownLoadById(context, bean);
                 notifyDownloadStateChanged(bean, DownLoadState.STATE_PAUSED);
@@ -111,23 +111,36 @@ public class DownLoadTask implements Runnable {
             bean.downloadState = DownLoadState.STATE_ERROR;
             DataBaseUtil.UpdateDownLoadById(context, bean);
             notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
-        }
-
-        //TODO 判断是否下载完成
-        if (bean.currentSize == bean.totalSize) {
-            bean.downloadState = DownLoadState.STATE_DOWNLOADED;
-            DataBaseUtil.UpdateDownLoadById(context, bean);
-            notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADED);
+        } finally {
+            try {
+                if (raf != null)
+                    raf.close();
+                if (fos != null)
+                    fos.close();
+                if (is != null)
+                    is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                //TODO 判断是否下载完成
+                if (bean.currentSize == bean.totalSize) {
+                    bean.downloadState = DownLoadState.STATE_DOWNLOADED;
+                    DataBaseUtil.UpdateDownLoadById(context, bean);
+                    notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADED);
+                }
+            }
         }
     }
 
-
-    public boolean isPaused() {
-        return isPaused;
+    public boolean isCanceled() {
+        return isPaused.get();
     }
 
     public void cancel() {
-        isPaused = true;
+        isPaused.set(false);
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.github.why168.multifiledownloader;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -18,13 +17,15 @@ public class DownLoadExecutors {
     public DownLoadExecutors() {
     }
 
-    public synchronized ExecutorService executorService() {
+    public synchronized ThreadPoolExecutor executorService() {
         if (executorService == null) {
             executorService = new ThreadPoolExecutor(0,
                     Integer.MAX_VALUE,
                     60, TimeUnit.SECONDS,
                     new SynchronousQueue<Runnable>(),
                     threadFactory("downLoad executors", false));
+
+            executorService.allowCoreThreadTimeOut(true);
         }
         return executorService;
     }

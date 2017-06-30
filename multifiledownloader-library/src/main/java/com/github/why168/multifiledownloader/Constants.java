@@ -51,8 +51,8 @@ public class Constants {
     public static final String DOWN_SUPPORT_RANGE = "down_support_range";
 
 
-    public static final int CONNECT_TIME = 10 * 1000;
-    public static final int READ_TIME = 10 * 1000;
+    public static final int CONNECT_TIME = 30 * 1000;
+    public static final int READ_TIME = 30 * 1000;
     // 下载的实体类key
     public static final String KEY_DOWNLOAD_ENTRY = "key_download_entry";
     // 下载操作状态key
