@@ -1,1 +1,1 @@
-include ':app', ':multifiledownloader-library'
+include ':app', ':multifiledownloader'

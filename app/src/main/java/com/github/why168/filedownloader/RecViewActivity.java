@@ -145,8 +145,9 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
             if (downloadState == DownLoadState.STATE_DELETE) {
                 viewAdapter.notifyItemRemoved(index);
                 collections.remove(index);
-                if (index != collections.size())
+                if (index != collections.size()) {
                     notifyChange(bean, index);
+                }
                 try {
                     File file = new File(bean.path);
                     boolean delete = file.delete();

@@ -5,7 +5,7 @@
 
 
 ### 效果图 
-![Image of 示例](https://raw.githubusercontent.com/why168/FileDownloader/master/Art/down.gif)
+![Image of 示例](./Art/down.gif)
 
 # Code
 

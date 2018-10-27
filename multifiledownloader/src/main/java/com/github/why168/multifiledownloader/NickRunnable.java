@@ -1,6 +1,8 @@
 package com.github.why168.multifiledownloader;
 
 
+import android.os.Process;
+
 import java.util.Locale;
 
 /**
@@ -19,6 +21,7 @@ abstract class NickRunnable implements Runnable {
 
     @Override
     public final void run() {
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         String oldName = Thread.currentThread().getName();
         Thread.currentThread().setName(name + " --- " + oldName);
         try {

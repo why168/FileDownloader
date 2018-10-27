@@ -74,8 +74,9 @@ public class AsyncDownCall extends NickRunnable {
                 byte[] buffer = new byte[2048];
                 int len = -1;
                 while ((len = is.read(buffer)) != -1) {
-                    if (isPaused.get())
+                    if (isPaused.get()) {
                         break;
+                    }
 
                     raf.write(buffer, 0, len);
                     bean.currentSize += len;
@@ -117,12 +118,15 @@ public class AsyncDownCall extends NickRunnable {
             notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
         } finally {
             try {
-                if (raf != null)
+                if (raf != null) {
                     raf.close();
-                if (fos != null)
+                }
+                if (fos != null) {
                     fos.close();
-                if (is != null)
+                }
+                if (is != null) {
                     is.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
