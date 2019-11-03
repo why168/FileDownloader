@@ -51,7 +51,7 @@ public class DownLoadService extends Service {
                     break;
             }
 
-            DownLoadObservable.getInstance().setData(bean);
+            DownLoadObservable.getInstance().dataChange(bean);
         }
     };
 
@@ -159,11 +159,11 @@ public class DownLoadService extends Service {
     public void deleteDownTask(DownLoadBean item) {
         // 删除文件，删除数据库
         try {
-            AsyncDownCall remove = mTaskMap.remove(item.id);
-            if (remove != null) {
-                remove.cancel();
-            } else {
-                mWaitingQueue.remove(item);
+            mWaitingQueue.remove(item);
+            AsyncDownCall downLoadTask = mTaskMap.get(item.id);
+            if (downLoadTask != null) {
+                downLoadTask.cancel();
+                mTaskMap.remove(item.id);
             }
             item.downloadState = STATE_DELETE;
             DataBaseUtil.DeleteDownLoadById(getApplicationContext(), item.id);
@@ -204,9 +204,10 @@ public class DownLoadService extends Service {
 
         // 2.TaskMap获取线程对象，移除线程;
         AsyncDownCall downLoadTask = mTaskMap.get(loadBean.id);
-        if (downLoadTask != null)
+        if (downLoadTask != null) {
             downLoadTask.cancel();
-        mTaskMap.remove(loadBean.id);
+            mTaskMap.remove(loadBean.id);
+        }
 
         // 3.状态修改成STATE_PAUSED;
         loadBean.downloadState = DownLoadState.STATE_PAUSED;

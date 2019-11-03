@@ -14,6 +14,7 @@ import java.text.DecimalFormat;
  * @since JDK1.8
  */
 public class FileUtilities {
+
     private static final String HASH_ALGORITHM = "MD5";
     private static final int RADIX = 10 + 26; // 10 digits + 26 letters
 
@@ -29,7 +30,7 @@ public class FileUtilities {
             MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
             digest.update(data);
             hash = digest.digest();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return hash;
@@ -53,15 +54,15 @@ public class FileUtilities {
             return "0M";
         }
         DecimalFormat df = new DecimalFormat("#.00");
-        String fileSizeString = "";
+        String fileSizeString;
         if (fileSize < 1024) {
             fileSizeString = df.format((double) fileSize) + "B";
-        } else if (fileSize < 1048576) {
+        } else if (fileSize < 1024 * 1024) {
             fileSizeString = df.format((double) fileSize / 1024) + "K";
-        } else if (fileSize < 1073741824) {
-            fileSizeString = df.format((double) fileSize / 1048576) + "M";
+        } else if (fileSize < 1024 * 1024 * 1024) {
+            fileSizeString = df.format((double) fileSize / (1024 * 1024)) + "M";
         } else {
-            fileSizeString = df.format((double) fileSize / 1073741824) + "G";
+            fileSizeString = df.format((double) fileSize / (1024 * 1024 * 1024)) + "G";
         }
         return fileSizeString;
     }

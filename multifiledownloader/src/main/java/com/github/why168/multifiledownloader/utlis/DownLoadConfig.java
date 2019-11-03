@@ -14,7 +14,7 @@ public class DownLoadConfig {
     private int maxTasks;
 
     private DownLoadConfig() {
-        this.maxTasks = 3;
+        this.maxTasks = 5;
     }
 
     private final static class Instance {
@@ -31,7 +31,7 @@ public class DownLoadConfig {
 
     public void setMaxTasks(int maxTasks) {
         if (maxTasks <= 0) {
-            this.maxTasks = 1;
+            this.maxTasks = 5;
         } else {
             this.maxTasks = maxTasks;
         }

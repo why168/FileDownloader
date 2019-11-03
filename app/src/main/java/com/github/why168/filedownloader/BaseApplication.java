@@ -13,12 +13,10 @@ import com.github.why168.multifiledownloader.utlis.DownLoadConfig;
  * @since JDK1.8
  */
 public class BaseApplication extends Application {
-    public static Context mContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mContext = this;
         // 初始化DownLoad
         DownLoadConfig.getConfig().setMaxTasks(3);
     }

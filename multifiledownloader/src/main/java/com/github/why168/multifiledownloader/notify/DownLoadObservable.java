@@ -14,7 +14,6 @@ import java.util.Observable;
  * @since JDK1.8
  */
 public class DownLoadObservable extends Observable {
-    private DownLoadBean data;
 
     private DownLoadObservable() {
     }
@@ -27,18 +26,10 @@ public class DownLoadObservable extends Observable {
         return Instance.instance;
     }
 
-    public void setData(DownLoadBean data) {
-        this.data = data;
-        dataChange(data);
-    }
-
-    private void dataChange(DownLoadBean data) {
-        Log.d("Edwin","DownLoadObservable setData " + data.downloadState + "  " + data.currentSize);
+    public void dataChange(DownLoadBean data) {
+        Log.d("Edwin", "DownLoadObservable dataChange " + data.downloadState + " , currentSize = " + data.currentSize);
         this.setChanged();
         this.notifyObservers(data);
     }
 
-    public DownLoadBean getData() {
-        return data;
-    }
 }

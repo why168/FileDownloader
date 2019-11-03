@@ -314,12 +314,12 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
 
         ViewHolder(View itemView) {
             super(itemView);
-            text_name = (TextView) itemView.findViewById(R.id.text_name);
-            button_start = (Button) itemView.findViewById(R.id.button_start);
-            button_delete = (Button) itemView.findViewById(R.id.button_delete);
-            text_progress = (TextView) itemView.findViewById(R.id.text_progress);
-            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
-            text_range = (TextView) itemView.findViewById(R.id.text_range);
+            text_name = itemView.findViewById(R.id.text_name);
+            button_start = itemView.findViewById(R.id.button_start);
+            button_delete = itemView.findViewById(R.id.button_delete);
+            text_progress = itemView.findViewById(R.id.text_progress);
+            progressBar = itemView.findViewById(R.id.progressBar);
+            text_range = itemView.findViewById(R.id.text_range);
         }
     }
 
