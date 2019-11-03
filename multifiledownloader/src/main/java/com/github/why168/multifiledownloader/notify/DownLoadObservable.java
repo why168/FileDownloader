@@ -33,7 +33,7 @@ public class DownLoadObservable extends Observable {
     }
 
     private void dataChange(DownLoadBean data) {
-        Log.e("lzx","DownLoadObservable setData " + data.downloadState + "  " + data.currentSize);
+        Log.d("Edwin","DownLoadObservable setData " + data.downloadState + "  " + data.currentSize);
         this.setChanged();
         this.notifyObservers(data);
     }

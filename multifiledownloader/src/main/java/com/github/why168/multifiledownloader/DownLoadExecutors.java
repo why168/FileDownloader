@@ -7,6 +7,7 @@ import com.github.why168.multifiledownloader.utlis.DownLoadConfig;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.Stack;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -53,7 +54,7 @@ public class DownLoadExecutors {
         };
     }
 
-    synchronized void execute(NickRunnable call) {
+    synchronized void execute(AsyncDownCall call) {
         if (runningAsyncCalls.size() < maxRequests) {
             runningAsyncCalls.add(call);
             executorService().execute(call);
@@ -62,7 +63,7 @@ public class DownLoadExecutors {
         }
     }
 
-    void finished(NickRunnable call) {
+    void finished(AsyncDownCall call) {
         synchronized (this) {
             if (!runningAsyncCalls.remove(call))
                 throw new AssertionError("AsyncCall wasn't running!");

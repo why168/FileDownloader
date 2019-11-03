@@ -91,7 +91,7 @@ public class DownLoadService extends Service {
                 case STATE_DOWNLOADED:
                 case STATE_DELETE:
                 case DownLoadState.STATE_PAUSED:
-                    Log.e("Message", "---> " + bean.toString());
+                    Log.d("Message", "---> " + bean.toString());
                     mTaskMap.remove(bean.id);
                     DownLoadBean poll = mWaitingQueue.poll();
                     if (poll != null) {
@@ -123,11 +123,11 @@ public class DownLoadService extends Service {
      * @param loadBean object
      */
     public void download(DownLoadBean loadBean) {
-        //TODO 先判断是否有这个app的下载信息,更新信息
+        // 先判断是否有这个app的下载信息,更新信息
         if (DataBaseUtil.getDownLoadById(getApplicationContext(), loadBean.id) != null) {
             DataBaseUtil.UpdateDownLoadById(getApplicationContext(), loadBean);
         } else {
-            //TODO 插入数据库
+            // 插入数据库
             DataBaseUtil.insertDown(getApplicationContext(), loadBean);
         }
 
@@ -162,23 +162,23 @@ public class DownLoadService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.e(TAG, "IBinder");
+        Log.d(TAG, "IBinder");
         return null;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e(TAG, "onStartCommand");
-        //TODO 执行
+        Log.d(TAG, "onStartCommand");
+        // 执行
         if (intent != null) {
             DownLoadBean bean = (DownLoadBean) intent.getSerializableExtra(Constants.KEY_DOWNLOAD_ENTRY);
             if (bean != null) {
                 boolean booleanExtra = intent.getBooleanExtra(Constants.KEY_OPERATING_STATE, false);
                 if (booleanExtra) {
-                    //TODO 删除下载
+                    // 删除下载
                     deleteDownTask(bean);
                 } else {
-                    //TODO 开始下载
+                    // 开始下载
                     download(bean);
                 }
             }
@@ -188,7 +188,7 @@ public class DownLoadService extends Service {
 
 
     public void deleteDownTask(DownLoadBean item) {
-        //TODO 删除文件，删除数据库
+        // 删除文件，删除数据库
         try {
             DownLoadTask remove = mTaskMap.remove(item.id);
             if (remove != null) {
@@ -205,13 +205,13 @@ public class DownLoadService extends Service {
     }
 
     private void downNone(DownLoadBean loadBean) {
-        //TODO 最最最--->先判断任务数是否
+        // 最最最--->先判断任务数是否
         if (mTaskMap.size() >= DownLoadConfig.getConfig().getMax_download_tasks()) {
             mWaitingQueue.offer(loadBean);
             loadBean.downloadState = DownLoadState.STATE_WAITING;
-            //TODO 更新数据库
+            // 更新数据库
             DataBaseUtil.UpdateDownLoadById(getApplicationContext(), loadBean);
-            //TODO 每次状态发生改变，都需要回调该方法通知所有观察者
+            // 每次状态发生改变，都需要回调该方法通知所有观察者
             notifyDownloadStateChanged(loadBean, DownLoadState.STATE_WAITING);
         } else {
             if (loadBean.totalSize <= 0) {
@@ -231,23 +231,23 @@ public class DownLoadService extends Service {
      * 等待状态
      */
     private void downWaiting(DownLoadBean loadBean) {
-        //TODO 1.移出去队列
+        // 1.移出去队列
         mWaitingQueue.remove(loadBean);
-        Log.e("Edwin", "mWaitingQueue size = " + mWaitingQueue.size());
+        Log.d("Edwin", "mWaitingQueue size = " + mWaitingQueue.size());
 
-        //TODO 2.TaskMap获取线程对象，移除线程;
+        // 2.TaskMap获取线程对象，移除线程;
         DownLoadTask downLoadTask = mTaskMap.get(loadBean.id);
         if (downLoadTask != null)
             downLoadTask.cancle();
         mTaskMap.remove(loadBean.id);
 
-        //TODO 3.状态修改成STATE_PAUSED;
+        // 3.状态修改成STATE_PAUSED;
         loadBean.downloadState = DownLoadState.STATE_PAUSED;
 
-        //TODO 4.更新数据库
+        // 4.更新数据库
         DataBaseUtil.UpdateDownLoadById(getApplicationContext(), loadBean);
 
-        //TODO 5.每次状态发生改变，都需要回调该方法通知所有观察者
+        // 5.每次状态发生改变，都需要回调该方法通知所有观察者
         notifyDownloadStateChanged(loadBean, DownLoadState.STATE_PAUSED);
     }
 
@@ -256,7 +256,7 @@ public class DownLoadService extends Service {
      * 暂停状态
      */
     private void downPaused(DownLoadBean loadBean) {
-        //TODO 1.状态修改成STATE_WAITING;
+        // 1.状态修改成STATE_WAITING;
         loadBean.downloadState = DownLoadState.STATE_WAITING;
         downNone(loadBean);
     }
@@ -266,7 +266,7 @@ public class DownLoadService extends Service {
      * 下载状态
      */
     private void downLoading(DownLoadBean loadBean) {
-        //TODO 1.TaskMap获取线程对象，移除线程;
+        // 1.TaskMap获取线程对象，移除线程;
         DownLoadTask downLoadTask = mTaskMap.get(loadBean.id);
         if (downLoadTask != null) {
             downLoadTask.cancle();
@@ -274,7 +274,7 @@ public class DownLoadService extends Service {
         } else {
             mWaitingQueue.remove(loadBean);
         }
-//        //TODO 2.状态修改成STATE_PAUSED;
+//        // 2.状态修改成STATE_PAUSED;
 //        loadBean.downloadState = DownLoadState.STATE_PAUSED;
 //        notifyDownloadStateChanged(loadBean, DownLoadState.STATE_PAUSED);
     }
@@ -283,25 +283,25 @@ public class DownLoadService extends Service {
      * 下载失败
      */
     private void downError(DownLoadBean loadBean) {
-        //TODO 1.删除本地文件文件
-        Log.i("Edwin", "删除本地文件文件 Id = " + loadBean.id);
-        //TODO 2.更新数据库数据库
+        // 1.删除本地文件文件
+        Log.d("Edwin", "删除本地文件文件 Id = " + loadBean.id);
+        // 2.更新数据库数据库
         DataBaseUtil.UpdateDownLoadById(getApplicationContext(), loadBean);
 
         loadBean.downloadState = DownLoadState.STATE_NONE;
 
 //        /*********以下操作与默认状态一样*********/
-//        //TODO 4.状态修改成STATE_WAITING；
-//        //TODO 5.创建一个线程;
-//        //TODO 6.放入TaskMap集合;
-//        //TODO 7.启动执行线程execute
+//        // 4.状态修改成STATE_WAITING；
+//        // 5.创建一个线程;
+//        // 6.放入TaskMap集合;
+//        // 7.启动执行线程execute
         download(loadBean);
     }
 
 
     @Override
     public void onDestroy() {
-        Log.e(TAG, "onDestroy");
+        Log.d(TAG, "onDestroy");
         super.onDestroy();
     }
 }
@@ -352,7 +352,7 @@ public class DownLoadTask implements Runnable {
             FileOutputStream fos = null;
             InputStream is = null;
             if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
-                Log.e("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_PARTIAL);
+                Log.d("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_PARTIAL);
                 raf = new RandomAccessFile(destFile, "rw");
                 raf.seek(bean.currentSize);
                 is = connection.getInputStream();
@@ -370,7 +370,7 @@ public class DownLoadTask implements Runnable {
                 raf.close();
                 is.close();
             } else if (responseCode == HttpURLConnection.HTTP_OK) {
-                Log.e("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_OK);
+                Log.d("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_OK);
                 bean.currentSize = 0;
                 fos = new FileOutputStream(destFile);
                 is = connection.getInputStream();
@@ -406,7 +406,7 @@ public class DownLoadTask implements Runnable {
             notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
         }
 
-        //TODO 判断是否下载完成
+        // 判断是否下载完成
         if (bean.currentSize == bean.totalSize) {
             bean.downloadState = STATE_DOWNLOADED;
             DataBaseUtil.UpdateDownLoadById(context, bean);

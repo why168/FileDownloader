@@ -1,6 +1,7 @@
 package com.github.why168.multifiledownloader;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * 下载任务实体类
@@ -10,6 +11,7 @@ import java.io.Serializable;
  * @since JDK1.8
  */
 public class DownLoadBean implements Serializable, Cloneable {
+
     public String id;//app的id url-md5
     public String appName;//app的软件名称
     public String appIcon;//app的图片
@@ -42,10 +44,5 @@ public class DownLoadBean implements Serializable, Cloneable {
     @Override
     public int hashCode() {
         return id.hashCode();
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
     }
 }

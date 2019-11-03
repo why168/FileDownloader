@@ -31,16 +31,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AsyncDownCall extends NickRunnable {
     private final Context context;
     private final Handler handler;
+    private final DownLoadExecutors downLoadExecutors;
     private DownLoadBean bean;
     private AtomicBoolean isPaused;
 
     @SuppressLint("SimpleDateFormat")
-    public AsyncDownCall(Context context, Handler handler, DownLoadBean loadBean) {
+    public AsyncDownCall(Context context, Handler handler, DownLoadBean loadBean, DownLoadExecutors downLoadExecutors) {
         super("AndroidHttp %s", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(Calendar.getInstance().getTime()));
         this.context = context;
         this.handler = handler;
         this.bean = loadBean;
         this.isPaused = new AtomicBoolean(false);
+        this.downLoadExecutors = downLoadExecutors;
     }
 
 
@@ -67,7 +69,7 @@ public class AsyncDownCall extends NickRunnable {
 
 
             if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
-                Log.e("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_PARTIAL);
+                Log.d("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_PARTIAL);
                 raf = new RandomAccessFile(destFile, "rw");
                 raf.seek(bean.currentSize);
                 is = connection.getInputStream();
@@ -84,7 +86,7 @@ public class AsyncDownCall extends NickRunnable {
                     notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
                 }
             } else if (responseCode == HttpURLConnection.HTTP_OK) {
-                Log.e("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_OK);
+                Log.d("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_OK);
                 bean.currentSize = 0;
                 fos = new FileOutputStream(destFile);
                 is = connection.getInputStream();
@@ -133,7 +135,7 @@ public class AsyncDownCall extends NickRunnable {
                 if (connection != null) {
                     connection.disconnect();
                 }
-                //TODO 判断是否下载完成
+                // 判断是否下载完成
                 if (bean.currentSize == bean.totalSize) {
                     bean.downloadState = DownLoadState.STATE_DOWNLOADED;
                     DataBaseUtil.UpdateDownLoadById(context, bean);
@@ -141,6 +143,8 @@ public class AsyncDownCall extends NickRunnable {
                 }
             }
         }
+
+//        downLoadExecutors.finished(this);
     }
 
 

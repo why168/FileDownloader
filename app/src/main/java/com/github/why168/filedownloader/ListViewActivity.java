@@ -41,7 +41,7 @@ public class ListViewActivity extends AppCompatActivity implements Observer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_view);
-        mListView = (ListView) findViewById(R.id.listView);
+        mListView = findViewById(R.id.listView);
         initData();
         mListView.setAdapter(adapter = new ViewAdapter());
     }
@@ -118,6 +118,7 @@ public class ListViewActivity extends AppCompatActivity implements Observer {
         ArrayList<DownLoadBean> downLoad = DataBaseUtil.getDownLoad(this);
         for (int i = 0; i < downLoad.size(); i++) {
             DownLoadBean beanI = downLoad.get(i);
+
             for (int j = 0; j < collections.size(); j++) {
                 DownLoadBean beanJ = collections.get(j);
                 if (beanI.id.equals(beanJ.id)) {
@@ -131,9 +132,13 @@ public class ListViewActivity extends AppCompatActivity implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
+        if (!(o instanceof DownLoadObservable)) {
+            return;
+        }
+
         final DownLoadBean bean = (DownLoadBean) arg;
         int index = collections.indexOf(bean);
-        Log.i("Edwin", "index = " + index + " bean = " + bean.toString());
+        Log.d("Edwin", "index = " + index + " bean = " + bean.toString());
         int downloadState = bean.downloadState;
 
         if (index != -1) {
@@ -142,7 +147,7 @@ public class ListViewActivity extends AppCompatActivity implements Observer {
                 try {
                     File file = new File(bean.path);
                     boolean delete = file.delete();
-                    Log.i("Edwin", "删除 state = " + delete);
+                    Log.d("Edwin", "删除 state = " + delete);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -179,15 +184,15 @@ public class ListViewActivity extends AppCompatActivity implements Observer {
                     holder.button_start.setText("点击下载");
                     break;
                 case DownLoadState.STATE_WAITING:
-                    //TODO 等待下载 改成 排队下载
+                    // 等待下载 改成 排队下载
                     holder.button_start.setText("排队下载");
                     break;
                 case DownLoadState.STATE_DOWNLOADING:
-                    //TODO 下载中 改成 正在下载
+                    // 下载中 改成 正在下载
                     holder.button_start.setText("正在下载");
                     break;
                 case DownLoadState.STATE_PAUSED:
-                    //TODO 暂停下载 换成 继续下载
+                    // 暂停下载 换成 继续下载
                     holder.button_start.setText("继续下载");
                     break;
                 case DownLoadState.STATE_DOWNLOADED:
@@ -201,19 +206,13 @@ public class ListViewActivity extends AppCompatActivity implements Observer {
                     break;
             }
 
-            holder.button_delete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mDownloadManager.delete(bean);
-                }
-            });
+            holder.button_delete.setOnClickListener(v ->
+                    mDownloadManager.delete(bean)
+            );
 
-            holder.button_start.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mDownloadManager.down(bean);
-                }
-            });
+            holder.button_start.setOnClickListener(v ->
+                    mDownloadManager.down(bean)
+            );
 
             holder.text_name.setText(bean.appName);
             holder.text_range.setText(String.valueOf(bean.isSupportRange));
@@ -245,16 +244,15 @@ public class ListViewActivity extends AppCompatActivity implements Observer {
         public View getView(int position, android.view.View convertView, ViewGroup parent) {
             ViewHolder viewHolder;
             if (convertView == null) {
-                convertView = LinearLayout.inflate(ListViewActivity.this, R.layout.item_down, null);
+                convertView = LinearLayout.inflate(parent.getContext(), R.layout.item_down, null);
                 viewHolder = new ViewHolder(convertView);
-                viewHolder.text_name = (TextView) convertView.findViewById(R.id.text_name);
-                viewHolder.button_start = (Button) convertView.findViewById(R.id.button_start);
-                viewHolder.button_delete = (Button) convertView.findViewById(R.id.button_delete);
-                viewHolder.text_progress = (TextView) convertView.findViewById(R.id.text_progress);
-                viewHolder.progressBar = (ProgressBar) convertView.findViewById(R.id.progressBar);
-                viewHolder.text_range = (TextView) convertView.findViewById(R.id.text_range);
+                viewHolder.text_name = convertView.findViewById(R.id.text_name);
+                viewHolder.button_start = convertView.findViewById(R.id.button_start);
+                viewHolder.button_delete = convertView.findViewById(R.id.button_delete);
+                viewHolder.text_progress = convertView.findViewById(R.id.text_progress);
+                viewHolder.progressBar = convertView.findViewById(R.id.progressBar);
+                viewHolder.text_range = convertView.findViewById(R.id.text_range);
                 convertView.setTag(viewHolder);
-
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
@@ -270,11 +268,11 @@ public class ListViewActivity extends AppCompatActivity implements Observer {
                     viewHolder.button_start.setText("等待下载");
                     break;
                 case DownLoadState.STATE_DOWNLOADING:
-                    //TODO 下载中 改成 正在下载
+                    // 下载中 改成 正在下载
                     viewHolder.button_start.setText("正在下载");
                     break;
                 case DownLoadState.STATE_PAUSED:
-                    //TODO 暂停下载 换成 继续下载
+                    // 暂停下载 换成 继续下载
                     viewHolder.button_start.setText("继续下载");
                     break;
                 case DownLoadState.STATE_DOWNLOADED:
@@ -288,19 +286,13 @@ public class ListViewActivity extends AppCompatActivity implements Observer {
                     break;
             }
 
-            viewHolder.button_delete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mDownloadManager.delete(bean);
-                }
-            });
+            viewHolder.button_delete.setOnClickListener(v ->
+                    mDownloadManager.delete(bean)
+            );
 
-            viewHolder.button_start.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mDownloadManager.down(bean);
-                }
-            });
+            viewHolder.button_start.setOnClickListener(v ->
+                    mDownloadManager.down(bean)
+            );
             viewHolder.text_range.setText(String.valueOf(bean.isSupportRange));
             viewHolder.text_progress.setText(FileUtilities.convertFileSize(bean.currentSize) + "/" + FileUtilities.convertFileSize(bean.totalSize));
             viewHolder.progressBar.setMax((int) bean.totalSize);

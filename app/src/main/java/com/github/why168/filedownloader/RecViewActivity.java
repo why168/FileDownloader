@@ -136,9 +136,13 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
+        if (!(o instanceof DownLoadObservable)) {
+            return;
+        }
+
         final DownLoadBean bean = (DownLoadBean) arg;
         int index = collections.indexOf(bean);
-        Log.i("Edwin", "index = " + index + " bean = " + bean.toString());
+        Log.d("Edwin", "index = " + index + " bean = " + bean.toString());
         int downloadState = bean.downloadState;
 
         if (index != -1 && isCurrentListViewItemVisible(index)) {
@@ -151,7 +155,7 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
                 try {
                     File file = new File(bean.path);
                     boolean delete = file.delete();
-                    Log.i("Edwin", "删除 state = " + delete);
+                    Log.d("Edwin", "删除 state = " + delete);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -177,15 +181,15 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
                 holder.button_start.setText("点击下载");
                 break;
             case DownLoadState.STATE_WAITING:
-                //TODO 等待下载 改成 排队下载
+                // 等待下载 改成 排队下载
                 holder.button_start.setText("排队下载");
                 break;
             case DownLoadState.STATE_DOWNLOADING:
-                //TODO 下载中 改成 正在下载
+                // 下载中 改成 正在下载
                 holder.button_start.setText("正在下载");
                 break;
             case DownLoadState.STATE_PAUSED:
-                //TODO 暂停下载 换成 继续下载
+                // 暂停下载 换成 继续下载
                 holder.button_start.setText("继续下载");
                 break;
             case DownLoadState.STATE_DOWNLOADED:
@@ -256,11 +260,11 @@ public class RecViewActivity extends AppCompatActivity implements Observer {
                     holder.button_start.setText("等待下载");
                     break;
                 case DownLoadState.STATE_DOWNLOADING:
-                    //TODO 下载中 改成 正在下载
+                    // 下载中 改成 正在下载
                     holder.button_start.setText("正在下载");
                     break;
                 case DownLoadState.STATE_PAUSED:
-                    //TODO 暂停下载 换成 继续下载
+                    // 暂停下载 换成 继续下载
                     holder.button_start.setText("继续下载");
                     break;
                 case DownLoadState.STATE_DOWNLOADED:

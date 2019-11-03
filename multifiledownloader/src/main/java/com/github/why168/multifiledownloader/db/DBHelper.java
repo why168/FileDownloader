@@ -16,10 +16,11 @@ import com.github.why168.multifiledownloader.Constants;
  * @version 2016/12/28 14:09
  * @since JDK1.8
  */
-class DBHelper extends SQLiteOpenHelper {
-    private static DBHelper instance;
+public class DBHelper extends SQLiteOpenHelper {
 
-    static SQLiteDatabase getInstance(Context context) {
+    private volatile static DBHelper instance;
+
+    public static SQLiteDatabase getInstance(Context context) {
         if (instance == null)
             synchronized (DBHelper.class) {
                 if (instance == null)
@@ -39,7 +40,7 @@ class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.e(DBHelper.this.getClass().toString(), "onUpgrade ----> oldVersion = " + oldVersion + ",newVersion = " + newVersion);
+        Log.d(DBHelper.this.getClass().toString(), "onUpgrade ----> oldVersion = " + oldVersion + ",newVersion = " + newVersion);
     }
 
     /**

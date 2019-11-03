@@ -38,7 +38,7 @@ public class DownFileObserver implements Observer {
 //                onError(bean);
 //                break;
 //        }
-        //TODO 通过Id，
+        // 通过Id，
 
     }
 

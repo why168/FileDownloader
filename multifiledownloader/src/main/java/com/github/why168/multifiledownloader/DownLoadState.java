@@ -8,34 +8,42 @@ package com.github.why168.multifiledownloader;
  * @since JDK1.8
  */
 public class DownLoadState {
+
     /**
-     * 默认
+     * 默认:点击下载
      */
-    public static final int STATE_NONE = -1;
+    public static final int STATE_NONE = 0;
+
     /**
      * 等待中
      */
     public static final int STATE_WAITING = 1;
-    /**
-     * 下载中
-     */
-    public static final int STATE_DOWNLOADING = 2;
-    /**
-     * 暂停
-     */
-    public static final int STATE_PAUSED = 3;
-    /**
-     * 下载完毕
-     */
-    public static final int STATE_DOWNLOADED = 4;
-    /**
-     * 下载失败
-     */
-    public static final int STATE_ERROR = 5;
+
     /**
      * 连接中
      */
     public static final int STATE_CONNECTION = 6;
+
+    /**
+     * 下载中
+     */
+    public static final int STATE_DOWNLOADING = 2;
+
+    /**
+     * 暂停
+     */
+    public static final int STATE_PAUSED = 3;
+
+    /**
+     * 下载完毕
+     */
+    public static final int STATE_DOWNLOADED = 4;
+
+    /**
+     * 下载失败
+     */
+    public static final int STATE_ERROR = 5;
+
     /**
      * 删除
      */

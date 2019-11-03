@@ -11,10 +11,10 @@ public class DownLoadConfig {
     /**
      * 下载的任务数
      */
-    private int maxTasks = 3;
+    private int maxTasks;
 
     private DownLoadConfig() {
-
+        this.maxTasks = 3;
     }
 
     private final static class Instance {
@@ -30,6 +30,10 @@ public class DownLoadConfig {
     }
 
     public void setMaxTasks(int maxTasks) {
-        this.maxTasks = maxTasks;
+        if (maxTasks <= 0) {
+            this.maxTasks = 1;
+        } else {
+            this.maxTasks = maxTasks;
+        }
     }
 }

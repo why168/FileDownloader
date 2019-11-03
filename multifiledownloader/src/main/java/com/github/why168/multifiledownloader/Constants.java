@@ -9,7 +9,7 @@ import android.os.Environment;
  * @version 2016/12/28 11:29
  * @since JDK1.8
  */
-public class Constants {
+public final class Constants {
     /**
      * 数据库版本
      */
@@ -59,4 +59,7 @@ public class Constants {
     public static final String KEY_OPERATING_STATE = "key_operating_state";
 
     public static final String ACTION_DOWNLOAD_BROAD_CAST = "action_download_broad_cast";
+
+    public static final String action = "com.github.why168.multifiledownloader.downloadservice";
+    public static final String packageName = "com.github.why168.multifiledownloader";
 }
