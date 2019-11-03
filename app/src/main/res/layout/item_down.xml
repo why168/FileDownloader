@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="10dp">
 
-    <LinearLayout
+    <android.support.v7.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-        <ImageView
+        <android.support.v7.widget.AppCompatImageView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:src="@mipmap/ic_launcher" />
 
-        <TextView
+        <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/text_name"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -25,30 +26,33 @@
                 android:text="名字"
                 android:textSize="18sp" />
 
-        <TextView
+        <Space
+                android:layout_width="5dp"
+                android:layout_height="match_parent" />
+
+        <android.support.v7.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="10dp"
                 android:gravity="center"
                 android:text="是否支持断点下载？"
                 android:textSize="18sp" />
 
-        <TextView
+        <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/text_range"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="10dp"
-                android:gravity="center"
-                android:text="" />
-    </LinearLayout>
+                android:gravity="start|center"
+                android:textColor="@android:color/holo_red_light"
+                tools:text="false" />
+    </android.support.v7.widget.LinearLayoutCompat>
 
-    <LinearLayout
+    <android.support.v7.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end"
             android:orientation="horizontal">
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
                 android:id="@+id/button_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -59,15 +63,15 @@
                 android:layout_width="15dp"
                 android:layout_height="match_parent" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
                 android:id="@+id/button_start"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="点击下载"
                 android:textColor="@color/colorPrimary" />
-    </LinearLayout>
+    </android.support.v7.widget.LinearLayoutCompat>
 
-    <TextView
+    <android.support.v7.widget.AppCompatTextView
             android:id="@+id/text_progress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,7 +80,7 @@
             android:text="00.00MB/00.00MB"
             android:textSize="18sp" />
 
-    <ProgressBar
+    <android.support.v4.widget.ContentLoadingProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
@@ -84,4 +88,4 @@
             android:layout_weight="1"
             android:max="100"
             android:progress="10" />
-</LinearLayout>
+</android.support.v7.widget.LinearLayoutCompat>

@@ -58,24 +58,15 @@ public class DataBaseUtil {
                 new String[]{DownloadID}, null, null, null, null);
         if (cursor.moveToNext()) {
             bean = new DownLoadBean();
-            bean.id = cursor.getString(cursor
-                    .getColumnIndex(Constants.DOWN_ID));
-            bean.appName = cursor.getString(cursor
-                    .getColumnIndex(Constants.DOWN_NAME));
-            bean.appIcon = cursor.getString(cursor
-                    .getColumnIndex(Constants.DOWN_ICON));
-            bean.url = cursor.getString(cursor
-                    .getColumnIndex(Constants.DOWN_URL));
-            bean.path = cursor.getString(cursor
-                    .getColumnIndex(Constants.DOWN_FILE_PATH));
-            bean.downloadState = cursor.getInt(cursor
-                    .getColumnIndex(Constants.DOWN_STATE));
-            bean.totalSize = cursor.getLong(cursor
-                    .getColumnIndex(Constants.DOWN_FILE_SIZE));
-            bean.currentSize = cursor.getLong(cursor
-                    .getColumnIndex(Constants.DOWN_FILE_SIZE_ING));
-            bean.isSupportRange = cursor.getLong(cursor
-                    .getColumnIndex(Constants.DOWN_SUPPORT_RANGE)) != 0;
+            bean.id = cursor.getString(cursor.getColumnIndex(Constants.DOWN_ID));
+            bean.appName = cursor.getString(cursor.getColumnIndex(Constants.DOWN_NAME));
+            bean.appIcon = cursor.getString(cursor.getColumnIndex(Constants.DOWN_ICON));
+            bean.url = cursor.getString(cursor.getColumnIndex(Constants.DOWN_URL));
+            bean.path = cursor.getString(cursor.getColumnIndex(Constants.DOWN_FILE_PATH));
+            bean.downloadState = cursor.getInt(cursor.getColumnIndex(Constants.DOWN_STATE));
+            bean.totalSize = cursor.getLong(cursor.getColumnIndex(Constants.DOWN_FILE_SIZE));
+            bean.currentSize = cursor.getLong(cursor.getColumnIndex(Constants.DOWN_FILE_SIZE_ING));
+            bean.isSupportRange = cursor.getLong(cursor.getColumnIndex(Constants.DOWN_SUPPORT_RANGE)) == 1;
         }
         cursor.close();
         return bean;
@@ -89,24 +80,15 @@ public class DataBaseUtil {
         Cursor cursor = DBHelper.selectInfo(context, Constants.TABLE_DOWN, new String[]{"*"}, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             DownLoadBean bean = new DownLoadBean();
-            bean.id = cursor.getString(cursor
-                    .getColumnIndex(Constants.DOWN_ID));
-            bean.appName = cursor.getString(cursor
-                    .getColumnIndex(Constants.DOWN_NAME));
-            bean.appIcon = cursor.getString(cursor
-                    .getColumnIndex(Constants.DOWN_ICON));
-            bean.totalSize = cursor.getLong(cursor
-                    .getColumnIndex(Constants.DOWN_FILE_SIZE));
-            bean.currentSize = cursor.getLong(cursor
-                    .getColumnIndex(Constants.DOWN_FILE_SIZE_ING));
-            bean.downloadState = cursor.getInt(cursor
-                    .getColumnIndex(Constants.DOWN_STATE));
-            bean.url = cursor.getString(cursor
-                    .getColumnIndex(Constants.DOWN_URL));
-            bean.path = cursor.getString(cursor
-                    .getColumnIndex(Constants.DOWN_FILE_PATH));
-            bean.isSupportRange = cursor.getLong(cursor
-                    .getColumnIndex(Constants.DOWN_SUPPORT_RANGE)) != 0;
+            bean.id = cursor.getString(cursor.getColumnIndex(Constants.DOWN_ID));
+            bean.appName = cursor.getString(cursor.getColumnIndex(Constants.DOWN_NAME));
+            bean.appIcon = cursor.getString(cursor.getColumnIndex(Constants.DOWN_ICON));
+            bean.totalSize = cursor.getLong(cursor.getColumnIndex(Constants.DOWN_FILE_SIZE));
+            bean.currentSize = cursor.getLong(cursor.getColumnIndex(Constants.DOWN_FILE_SIZE_ING));
+            bean.downloadState = cursor.getInt(cursor.getColumnIndex(Constants.DOWN_STATE));
+            bean.url = cursor.getString(cursor.getColumnIndex(Constants.DOWN_URL));
+            bean.path = cursor.getString(cursor.getColumnIndex(Constants.DOWN_FILE_PATH));
+            bean.isSupportRange = cursor.getLong(cursor.getColumnIndex(Constants.DOWN_SUPPORT_RANGE)) == 1;
 
             list.add(bean);
         }
@@ -140,7 +122,7 @@ public class DataBaseUtil {
                 bean.downloadState + "",
                 bean.totalSize + "",
                 bean.currentSize + "",
-                bean.isSupportRange + ""};
+                bean.isSupportRange ? 1 + "" : 0 + ""};
 
         DBHelper.updateInfo(context, true, Constants.TABLE_DOWN, titles, values, Constants.DOWN_ID + " =? ", new String[]{bean.id});
     }

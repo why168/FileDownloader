@@ -1,26 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="@dimen/activity_horizontal_margin"
-    android:orientation="vertical">
-
-    <Button
-        android:id="@+id/button"
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/activity_vertical_margin"
-        android:onClick="jumpList"
-        android:text="ListView"
-        android:textAllCaps="false" />
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:orientation="vertical">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/activity_vertical_margin"
-        android:onClick="jumpRec"
-        android:text="RecyclerView"
-        android:textAllCaps="false" />
+    <android.support.v7.widget.AppCompatButton
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="jumpList"
+            android:text="ListView" />
 
-</LinearLayout>
+    <Space
+            android:layout_width="match_parent"
+            android:layout_height="5dp" />
+
+    <android.support.v7.widget.AppCompatButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="jumpRec"
+            android:text="RecyclerView" />
+
+    <Space
+            android:layout_width="match_parent"
+            android:layout_height="5dp" />
+
+
+    <android.support.v7.widget.AppCompatButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="resetData"
+            android:text="重置数据"
+            android:textAllCaps="false" />
+</android.support.v7.widget.LinearLayoutCompat>
 

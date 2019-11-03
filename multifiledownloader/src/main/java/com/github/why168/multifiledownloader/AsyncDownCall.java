@@ -68,11 +68,12 @@ public class AsyncDownCall extends NickRunnable {
 
             if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
                 Log.d("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_PARTIAL);
+                bean.isSupportRange = true;
                 raf = new RandomAccessFile(destFile, "rw");
                 raf.seek(bean.currentSize);
                 is = connection.getInputStream();
                 byte[] buffer = new byte[2048];
-                int len = -1;
+                int len;
                 while ((len = is.read(buffer)) != -1) {
                     if (isPaused.get()) {
                         break;
@@ -84,12 +85,18 @@ public class AsyncDownCall extends NickRunnable {
                     notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
                 }
             } else if (responseCode == HttpURLConnection.HTTP_OK) {
+
+                String ranges = connection.getHeaderField("Accept-Ranges");
+                if ("bytes".equalsIgnoreCase(ranges)) {
+                    bean.isSupportRange = true;
+                }
+
                 Log.d("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_OK);
                 bean.currentSize = 0;
                 fos = new FileOutputStream(destFile);
                 is = connection.getInputStream();
                 byte[] buffer = new byte[2048];
-                int len = -1;
+                int len;
                 while ((len = is.read(buffer)) != -1) {
                     if (isPaused.get()) {
                         break;
@@ -141,8 +148,6 @@ public class AsyncDownCall extends NickRunnable {
                 }
             }
         }
-
-//        downLoadExecutors.finished(this);
     }
 
 
