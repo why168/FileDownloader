@@ -1,5 +1,5 @@
 # FileDownloader 介绍
-
+### [apk最新体验包下载](https://github.com/why168/FileDownloader/releases/download/v0.8/debug.v0.8.build1.apk)
 
 * 多任务断点下载
 * 支持线程数控制：DownLoadConfig.getConfig().setMaxTasks(3);
@@ -22,7 +22,7 @@
 ### 效果图 
 ![Image of 示例](./Art/down.gif)
 
-### 待开发任务清单及组件规划
+## 待开发任务清单及组件规划
 1. 跟上潮流改写kotlin
 2. 优化点
 	* 线程 + service
@@ -31,6 +31,7 @@
 3. 网络请求是否改成okhtpp？（待定）
 	* 最开始用的是HttpURLConnection因为想着别用使用此组件方便（解决包重复、版本冲突）
 4. 有什么疑问想法直接上[Issues](https://github.com/why168/FileDownloader/issues)
+
 
 
 <br>
