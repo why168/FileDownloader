@@ -12,6 +12,7 @@ import com.github.why168.multifiledownloader.db.DataBaseUtil;
 import com.github.why168.multifiledownloader.notify.DownLoadObservable;
 import com.github.why168.multifiledownloader.utlis.DownLoadConfig;
 
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -20,11 +21,11 @@ import static com.github.why168.multifiledownloader.DownLoadState.STATE_DELETE;
 import static com.github.why168.multifiledownloader.DownLoadState.STATE_DOWNLOADED;
 
 public class DownLoadService extends Service {
-    private String TAG = DownLoadService.this.getClass().getName();
-    private DownLoadExecutors downLoadExecutors;
-    private ThreadPoolExecutor downLoadExecutor;
-    private ConcurrentHashMap<String, AsyncDownCall> mTaskMap;
-    private LinkedBlockingDeque<DownLoadBean> mWaitingQueue;
+    private final String TAG = DownLoadService.this.getClass().getName();
+    private DownLoadExecutors downLoadExecutor = new DownLoadExecutors();
+    private ConcurrentHashMap<String, AsyncDownCall> mTaskMap = new ConcurrentHashMap<>();
+    private LinkedBlockingDeque<DownLoadBean> mWaitingQueue = new LinkedBlockingDeque<>(); // 等待队列
+
     /**
      * 当下载状态发送改变的时候回调
      */
@@ -55,11 +56,6 @@ public class DownLoadService extends Service {
     };
 
     public DownLoadService() {
-        Log.d(TAG, "DownLoadService");
-        downLoadExecutors = new DownLoadExecutors();
-        downLoadExecutor = new DownLoadExecutors().executorService();
-        mTaskMap = new ConcurrentHashMap<>();
-        mWaitingQueue = new LinkedBlockingDeque<>();
     }
 
     @Override
@@ -188,12 +184,12 @@ public class DownLoadService extends Service {
             notifyDownloadStateChanged(loadBean, DownLoadState.STATE_WAITING);
         } else {
             if (loadBean.totalSize <= 0) {
-                AsyncConnectCall connectThread = new AsyncConnectCall(this, handler, mTaskMap, downLoadExecutor, loadBean, downLoadExecutors);
+                AsyncConnectCall connectThread = new AsyncConnectCall(this, handler, mTaskMap, downLoadExecutor, loadBean);
                 downLoadExecutor.execute(connectThread);
             } else {
-                AsyncDownCall downLoadTask = new AsyncDownCall(this, handler, loadBean, downLoadExecutors);
+                AsyncDownCall downLoadTask = new AsyncDownCall(this, handler, loadBean);
                 mTaskMap.put(loadBean.id, downLoadTask);
-                downLoadExecutors.execute(downLoadTask);
+                downLoadExecutor.execute(downLoadTask);
             }
         }
     }
@@ -221,7 +217,6 @@ public class DownLoadService extends Service {
         // 5.每次状态发生改变，都需要回调该方法通知所有观察者
         notifyDownloadStateChanged(loadBean, DownLoadState.STATE_PAUSED);
     }
-
 
     /**
      * 暂停状态

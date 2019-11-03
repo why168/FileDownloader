@@ -15,11 +15,6 @@ public class DownLoadState {
     public static final int STATE_NONE = 0;
 
     /**
-     * 等待中
-     */
-    public static final int STATE_WAITING = 1;
-
-    /**
      * 连接中
      */
     public static final int STATE_CONNECTION = 6;
@@ -30,9 +25,9 @@ public class DownLoadState {
     public static final int STATE_DOWNLOADING = 2;
 
     /**
-     * 暂停
+     * 等待中 排队状态
      */
-    public static final int STATE_PAUSED = 3;
+    public static final int STATE_WAITING = 1;
 
     /**
      * 下载完毕
@@ -43,6 +38,11 @@ public class DownLoadState {
      * 下载失败
      */
     public static final int STATE_ERROR = 5;
+
+    /**
+     * 暂停
+     */
+    public static final int STATE_PAUSED = 3;
 
     /**
      * 删除

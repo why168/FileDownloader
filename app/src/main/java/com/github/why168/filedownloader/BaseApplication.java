@@ -20,7 +20,7 @@ public class BaseApplication extends Application {
         super.onCreate();
         mContext = this;
         // 初始化DownLoad
-        DownLoadConfig.getConfig().setMaxTasks(2);
+        DownLoadConfig.getConfig().setMaxTasks(3);
     }
 
 }

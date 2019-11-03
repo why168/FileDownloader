@@ -29,15 +29,13 @@ public class AsyncConnectCall extends NickRunnable {
     private final Handler handler;
     private final ConcurrentHashMap<String, AsyncDownCall> mTaskMap;
     private final ExecutorService executorService;
-    private final DownLoadExecutors downLoadExecutors;
     private DownLoadBean bean;
     private AtomicBoolean isRunning;
 
     @SuppressLint("SimpleDateFormat")
     public AsyncConnectCall(Context context, Handler handler,
                             ConcurrentHashMap<String, AsyncDownCall> mTaskMap,
-                            ExecutorService executorService, DownLoadBean bean,
-                            DownLoadExecutors downLoadExecutors) {
+                            ExecutorService executorService, DownLoadBean bean) {
         super("AndroidHttp %s", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(Calendar.getInstance().getTime()));
         this.context = context;
         this.handler = handler;
@@ -45,7 +43,6 @@ public class AsyncConnectCall extends NickRunnable {
         this.executorService = executorService;
         this.bean = bean;
         this.isRunning = new AtomicBoolean(true);
-        this.downLoadExecutors = downLoadExecutors;
     }
 
 
@@ -78,7 +75,7 @@ public class AsyncConnectCall extends NickRunnable {
             Log.d("Edwin", "连接成功--isSupportRange = " + bean.isSupportRange);
 
             // 开始下载咯
-            AsyncDownCall downLoadTask = new AsyncDownCall(context, handler, bean, downLoadExecutors);
+            AsyncDownCall downLoadTask = new AsyncDownCall(context, handler, bean);
             mTaskMap.put(bean.id, downLoadTask);
             executorService.execute(downLoadTask);
         } catch (IOException e) {

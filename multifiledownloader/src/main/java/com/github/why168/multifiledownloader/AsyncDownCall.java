@@ -31,18 +31,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AsyncDownCall extends NickRunnable {
     private final Context context;
     private final Handler handler;
-    private final DownLoadExecutors downLoadExecutors;
     private DownLoadBean bean;
     private AtomicBoolean isPaused;
 
     @SuppressLint("SimpleDateFormat")
-    public AsyncDownCall(Context context, Handler handler, DownLoadBean loadBean, DownLoadExecutors downLoadExecutors) {
+    public AsyncDownCall(Context context, Handler handler, DownLoadBean loadBean) {
         super("AndroidHttp %s", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(Calendar.getInstance().getTime()));
         this.context = context;
         this.handler = handler;
         this.bean = loadBean;
         this.isPaused = new AtomicBoolean(false);
-        this.downLoadExecutors = downLoadExecutors;
     }
 
 
