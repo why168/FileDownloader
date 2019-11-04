@@ -1,5 +1,5 @@
 # FileDownloader 介绍
-### [apk最新体验包v0.9下载](https://github.com/why168/FileDownloader/releases/download/v0.9/debug.v0.9.build1.apk)
+### [apk最新体验包v1.0下载](https://github.com/why168/FileDownloader/releases/download/v1.0/debug.v1.0.build1.apk)
 
 * 多任务断点下载
 * 支持线程数控制：DownLoadConfig.getConfig().setMaxTasks(3);
