@@ -93,6 +93,7 @@ public class AsyncDownCall extends NickRunnable {
                 Log.d("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_OK);
                 bean.currentSize = 0;
                 fos = new FileOutputStream(destFile);
+                fos.getChannel().force(true); // 文件数据和元数据强制写到磁盘
                 is = connection.getInputStream();
                 byte[] buffer = new byte[2048];
                 int len;
