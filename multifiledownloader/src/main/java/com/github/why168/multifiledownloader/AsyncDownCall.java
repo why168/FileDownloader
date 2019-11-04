@@ -68,7 +68,7 @@ public class AsyncDownCall extends NickRunnable {
             if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
                 Log.d("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_PARTIAL);
                 bean.isSupportRange = true;
-                raf = new RandomAccessFile(destFile, "rw");
+                raf = new RandomAccessFile(destFile, "rws");
                 raf.seek(bean.currentSize);
                 is = connection.getInputStream();
                 byte[] buffer = new byte[2048];
