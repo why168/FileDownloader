@@ -65,7 +65,6 @@ public class AsyncDownCall extends NickRunnable {
             int responseCode = connection.getResponseCode();
             int contentLength = connection.getContentLength();
 
-
             if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
                 Log.d("Edwin", bean.appName + " code = " + HttpURLConnection.HTTP_PARTIAL);
                 bean.isSupportRange = true;
@@ -102,11 +101,12 @@ public class AsyncDownCall extends NickRunnable {
                         break;
                     }
                     fos.write(buffer, 0, len);
+                    fos.flush();
+                    fos.getFD().sync();
                     bean.currentSize += len;
                     DataBaseUtil.UpdateDownLoadById(context, bean);
                     notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
                 }
-                fos.flush();
             } else {
                 bean.downloadState = DownLoadState.STATE_ERROR;
                 DataBaseUtil.UpdateDownLoadById(context, bean);
