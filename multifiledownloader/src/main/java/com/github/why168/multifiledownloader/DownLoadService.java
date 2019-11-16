@@ -138,7 +138,7 @@ public class DownLoadService extends Service {
             downPaused(context, loadBean);
         } else if (state == DownLoadState.STATE_DOWNLOADING.getIndex()) {
             //下载中
-            downLoading(loadBean);
+            downLoading(context, loadBean);
         } else if (state == DownLoadState.STATE_CONNECTION.getIndex()) {
             //连接中
             downConning(loadBean);
@@ -227,7 +227,7 @@ public class DownLoadService extends Service {
     /**
      * 下载状态
      */
-    private static void downLoading(DownLoadBean loadBean) {
+    private static void downLoading(Context context, DownLoadBean loadBean) {
         // 1.TaskMap获取线程对象，移除线程;
         AsyncDownCall downLoadTask = downTaskMap.get(loadBean.id);
         if (downLoadTask != null) {
@@ -235,6 +235,13 @@ public class DownLoadService extends Service {
             downTaskMap.remove(loadBean.id);
         } else {
             mWaitingQueue.remove(loadBean);
+        }
+        //TODO 执行下载队列中的任务
+//        notifyDownloadStateChanged(c,);
+
+        DownLoadBean poll = mWaitingQueue.poll();
+        if (poll != null) {
+            downNone(context, poll);
         }
     }
 

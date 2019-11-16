@@ -112,21 +112,28 @@ class ListViewActivity : AppCompatActivity(), Observer {
         if (position in firstVisible..lastVisible) {
             val view = listView.getChildAt(position - firstVisible)
             val holder = view.tag as ViewHolder
-            //然后使用viewholder去更新需要更新的view。
             when (bean.downloadState) {
-                DownLoadState.STATE_NONE.index -> holder.button_start.text = "点击下载"
-                DownLoadState.STATE_WAITING.index ->
-                    // 等待下载 改成 排队下载
-                    holder.button_start.text = "排队下载"
-                DownLoadState.STATE_DOWNLOADING.index ->
-                    // 下载中 改成 正在下载
-                    holder.button_start.text = "正在下载"
-                DownLoadState.STATE_PAUSED.index ->
-                    // 暂停下载 换成 继续下载
-                    holder.button_start.text = "继续下载"
-                DownLoadState.STATE_DOWNLOADED.index -> holder.button_start.text = "下载完毕"
-                DownLoadState.STATE_ERROR.index -> holder.button_start.text = "下载错误"
-                DownLoadState.STATE_CONNECTION.index -> holder.button_start.text = "连接中"
+                DownLoadState.STATE_NONE.index -> {
+                    holder.button_start.text = DownLoadState.STATE_NONE.content
+                }
+                DownLoadState.STATE_WAITING.index -> {
+                    holder.button_start.text = DownLoadState.STATE_WAITING.content
+                }
+                DownLoadState.STATE_DOWNLOADING.index -> {
+                    holder.button_start.text = DownLoadState.STATE_DOWNLOADING.content
+                }
+                DownLoadState.STATE_PAUSED.index -> {
+                    holder.button_start.text = DownLoadState.STATE_PAUSED.content
+                }
+                DownLoadState.STATE_DOWNLOADED.index -> {
+                    holder.button_start.text = DownLoadState.STATE_DOWNLOADED.content
+                }
+                DownLoadState.STATE_ERROR.index -> {
+                    holder.button_start.text = DownLoadState.STATE_ERROR.content
+                }
+                DownLoadState.STATE_CONNECTION.index -> {
+                    holder.button_start.text = DownLoadState.STATE_CONNECTION.content
+                }
             }
 
             holder.button_delete.setOnClickListener { v -> mDownloadManager?.deleteTask(bean) }
@@ -165,8 +172,8 @@ class ListViewActivity : AppCompatActivity(), Observer {
             val contentView: View
             if (convertView == null) {
 //                contentView = LinearLayout.inflate(parent.context, R.layout.item_down, null)
-                contentView =
-                    LayoutInflater.from(parent.context).inflate(R.layout.item_down, parent, false)
+                contentView = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_down, parent, false)
                 viewHolder = ViewHolder(contentView)
                 contentView.tag = viewHolder
             } else {
@@ -178,15 +185,27 @@ class ListViewActivity : AppCompatActivity(), Observer {
             viewHolder.text_name.text = bean.appName
 
             when (bean.downloadState) {
-                DownLoadState.STATE_NONE.index -> viewHolder.button_start.text = "点击下载"
-                DownLoadState.STATE_WAITING.index -> viewHolder.button_start.text = "等待下载"
-                // 下载中 改成 正在下载
-                DownLoadState.STATE_DOWNLOADING.index -> viewHolder.button_start.text = "正在下载"
-                // 暂停下载 换成 继续下载
-                DownLoadState.STATE_PAUSED.index -> viewHolder.button_start.text = "继续下载"
-                DownLoadState.STATE_DOWNLOADED.index -> viewHolder.button_start.text = "下载完毕"
-                DownLoadState.STATE_ERROR.index -> viewHolder.button_start.text = "下载错误"
-                DownLoadState.STATE_CONNECTION.index -> viewHolder.button_start.text = "连接中"
+                DownLoadState.STATE_NONE.index -> {
+                    viewHolder.button_start.text = DownLoadState.STATE_NONE.content
+                }
+                DownLoadState.STATE_WAITING.index -> {
+                    viewHolder.button_start.text = DownLoadState.STATE_WAITING.content
+                }
+                DownLoadState.STATE_DOWNLOADING.index -> {
+                    viewHolder.button_start.text = DownLoadState.STATE_DOWNLOADING.content
+                }
+                DownLoadState.STATE_PAUSED.index -> {
+                    viewHolder.button_start.text = DownLoadState.STATE_PAUSED.content
+                }
+                DownLoadState.STATE_DOWNLOADED.index -> {
+                    viewHolder.button_start.text = DownLoadState.STATE_DOWNLOADED.content
+                }
+                DownLoadState.STATE_ERROR.index -> {
+                    viewHolder.button_start.text = DownLoadState.STATE_ERROR.content
+                }
+                DownLoadState.STATE_CONNECTION.index -> {
+                    viewHolder.button_start.text = DownLoadState.STATE_CONNECTION.content
+                }
             }
 
             viewHolder.button_delete.setOnClickListener { v ->
@@ -208,15 +227,6 @@ class ListViewActivity : AppCompatActivity(), Observer {
         }
     }
 
-    //    private class ViewHolder internal constructor(itemView: View) {
     private class ViewHolder
-    internal constructor(override val containerView: View) : LayoutContainer {
-
-//        internal var text_name: TextView = itemView.findViewById<View>(R.id.text_name) as TextView
-//        internal var button_start: Button = itemView.findViewById<View>(R.id.button_start) as Button
-//        internal var button_delete: Button = itemView.findViewById<View>(R.id.button_delete) as Button
-//        internal var text_progress: TextView = itemView.findViewById<View>(R.id.text_progress) as TextView
-//        internal var progressBar: ProgressBar = itemView.findViewById<View>(R.id.progressBar) as ProgressBar
-//        internal var text_range: TextView = itemView.findViewById<View>(R.id.text_range) as TextView
-    }
+    internal constructor(override val containerView: View) : LayoutContainer
 }
