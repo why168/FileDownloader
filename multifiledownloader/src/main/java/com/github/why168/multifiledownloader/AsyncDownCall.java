@@ -53,7 +53,7 @@ public class AsyncDownCall extends NickRunnable {
         File destFile = FileUtilities.getDownloadFile(bean.url);
         bean.path = destFile.getPath();
         HttpURLConnection connection = null;
-        bean.downloadState = DownLoadState.STATE_DOWNLOADING;
+        bean.downloadState = DownLoadState.STATE_DOWNLOADING.getIndex();
         try {
             connection = (HttpURLConnection) new URL(bean.url).openConnection();
             connection.setRequestMethod("GET");
@@ -81,7 +81,7 @@ public class AsyncDownCall extends NickRunnable {
                     raf.write(buffer, 0, len);
                     bean.currentSize += len;
                     DataBaseUtil.UpdateDownLoadById(context, bean);
-                    notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
+                    notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING.getIndex());
                 }
             } else if (responseCode == HttpURLConnection.HTTP_OK) {
 
@@ -106,24 +106,24 @@ public class AsyncDownCall extends NickRunnable {
                     fos.getFD().sync();
                     bean.currentSize += len;
                     DataBaseUtil.UpdateDownLoadById(context, bean);
-                    notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING);
+                    notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADING.getIndex());
                 }
             } else {
-                bean.downloadState = DownLoadState.STATE_ERROR;
+                bean.downloadState = DownLoadState.STATE_ERROR.getIndex();
                 DataBaseUtil.UpdateDownLoadById(context, bean);
-                notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
+                notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR.getIndex());
             }
 
             if (isPaused.get()) {
-                bean.downloadState = DownLoadState.STATE_PAUSED;
+                bean.downloadState = DownLoadState.STATE_PAUSED.getIndex();
                 DataBaseUtil.UpdateDownLoadById(context, bean);
-                notifyDownloadStateChanged(bean, DownLoadState.STATE_PAUSED);
+                notifyDownloadStateChanged(bean, DownLoadState.STATE_PAUSED.getIndex());
             }
         } catch (Exception e) {
             e.printStackTrace();
-            bean.downloadState = DownLoadState.STATE_ERROR;
+            bean.downloadState = DownLoadState.STATE_ERROR.getIndex();
             DataBaseUtil.UpdateDownLoadById(context, bean);
-            notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
+            notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR.getIndex());
         } finally {
             try {
                 if (raf != null) {
@@ -143,9 +143,9 @@ public class AsyncDownCall extends NickRunnable {
                 }
                 // 判断是否下载完成
                 if (bean.currentSize == bean.totalSize) {
-                    bean.downloadState = DownLoadState.STATE_DOWNLOADED;
+                    bean.downloadState = DownLoadState.STATE_DOWNLOADED.getIndex();
                     DataBaseUtil.UpdateDownLoadById(context, bean);
-                    notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADED);
+                    notifyDownloadStateChanged(bean, DownLoadState.STATE_DOWNLOADED.getIndex());
                 }
             }
         }

@@ -27,30 +27,35 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AsyncConnectCall extends NickRunnable {
     private final Context context;
     private final Handler handler;
-    private final ConcurrentHashMap<String, AsyncDownCall> mTaskMap;
+    private final ConcurrentHashMap<String, AsyncDownCall> downTaskMap;
     private final ExecutorService executorService;
+    private final ConcurrentHashMap<String, AsyncConnectCall> connectionTaskMap;
     private DownLoadBean bean;
     private AtomicBoolean isRunning;
 
     @SuppressLint("SimpleDateFormat")
     public AsyncConnectCall(Context context, Handler handler,
-                            ConcurrentHashMap<String, AsyncDownCall> mTaskMap,
-                            ExecutorService executorService, DownLoadBean bean) {
+                            ConcurrentHashMap<String, AsyncConnectCall> connectionTaskMap,
+                            ConcurrentHashMap<String, AsyncDownCall> downTaskMap,
+                            ExecutorService executorService,
+                            DownLoadBean bean) {
         super("AndroidHttp %s", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(Calendar.getInstance().getTime()));
         this.context = context;
         this.handler = handler;
-        this.mTaskMap = mTaskMap;
+        this.downTaskMap = downTaskMap;
         this.executorService = executorService;
         this.bean = bean;
         this.isRunning = new AtomicBoolean(true);
+        this.connectionTaskMap = connectionTaskMap;
+        this.connectionTaskMap.put(bean.id, this);
     }
 
 
     @Override
     protected void execute() {
-        bean.downloadState = DownLoadState.STATE_CONNECTION;
+        bean.downloadState = DownLoadState.STATE_CONNECTION.getIndex();
         DataBaseUtil.UpdateDownLoadById(context, bean);
-        notifyDownloadStateChanged(bean, DownLoadState.STATE_CONNECTION);
+        notifyDownloadStateChanged(bean, DownLoadState.STATE_CONNECTION.getIndex());
 
         HttpURLConnection connection = null;
         try {
@@ -67,7 +72,7 @@ public class AsyncConnectCall extends NickRunnable {
                 }
                 bean.totalSize = contentLength;
             } else {
-                bean.downloadState = DownLoadState.STATE_ERROR;
+                bean.downloadState = DownLoadState.STATE_ERROR.getIndex();
             }
 
 //            DataBaseUtil.UpdateDownLoadById(context, bean);
@@ -76,14 +81,19 @@ public class AsyncConnectCall extends NickRunnable {
 
             // 开始下载咯
             AsyncDownCall downLoadTask = new AsyncDownCall(context, handler, bean);
-            mTaskMap.put(bean.id, downLoadTask);
-            executorService.execute(downLoadTask);
+            if (downTaskMap.get(bean.id) == null) {
+                downTaskMap.put(bean.id, downLoadTask);
+                executorService.execute(downLoadTask);
+
+                // 移除
+                connectionTaskMap.remove(bean.id);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             isRunning.set(false);
-            bean.downloadState = DownLoadState.STATE_ERROR;
+            bean.downloadState = DownLoadState.STATE_ERROR.getIndex();
             DataBaseUtil.UpdateDownLoadById(context, bean);
-            notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR);
+            notifyDownloadStateChanged(bean, DownLoadState.STATE_ERROR.getIndex());
             Log.d("Edwin", "连接失败");
         } finally {
             if (connection != null) {
@@ -91,7 +101,6 @@ public class AsyncConnectCall extends NickRunnable {
             }
         }
     }
-
 
     public boolean isCanceled() {
         return isRunning.get();

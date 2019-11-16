@@ -8,11 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.ListView
-import android.widget.ProgressBar
-import android.widget.TextView
 
 import com.github.why168.multifiledownloader.DownLoadBean
 import com.github.why168.multifiledownloader.DownLoadState
@@ -82,7 +77,7 @@ class ListViewActivity : AppCompatActivity(), Observer {
         val downloadState = bean.downloadState
 
         if (index != -1) {
-            if (downloadState == DownLoadState.STATE_DELETE) {
+            if (downloadState == DownLoadState.STATE_DELETE.index) {
                 collections.removeAt(index)
                 try {
                     val file = File(bean.path)
@@ -119,24 +114,24 @@ class ListViewActivity : AppCompatActivity(), Observer {
             val holder = view.tag as ViewHolder
             //然后使用viewholder去更新需要更新的view。
             when (bean.downloadState) {
-                DownLoadState.STATE_NONE -> holder.button_start.text = "点击下载"
-                DownLoadState.STATE_WAITING ->
+                DownLoadState.STATE_NONE.index -> holder.button_start.text = "点击下载"
+                DownLoadState.STATE_WAITING.index ->
                     // 等待下载 改成 排队下载
                     holder.button_start.text = "排队下载"
-                DownLoadState.STATE_DOWNLOADING ->
+                DownLoadState.STATE_DOWNLOADING.index ->
                     // 下载中 改成 正在下载
                     holder.button_start.text = "正在下载"
-                DownLoadState.STATE_PAUSED ->
+                DownLoadState.STATE_PAUSED.index ->
                     // 暂停下载 换成 继续下载
                     holder.button_start.text = "继续下载"
-                DownLoadState.STATE_DOWNLOADED -> holder.button_start.text = "下载完毕"
-                DownLoadState.STATE_ERROR -> holder.button_start.text = "下载错误"
-                DownLoadState.STATE_CONNECTION -> holder.button_start.text = "连接中"
+                DownLoadState.STATE_DOWNLOADED.index -> holder.button_start.text = "下载完毕"
+                DownLoadState.STATE_ERROR.index -> holder.button_start.text = "下载错误"
+                DownLoadState.STATE_CONNECTION.index -> holder.button_start.text = "连接中"
             }
 
-            holder.button_delete.setOnClickListener { v -> mDownloadManager?.delete(bean) }
+            holder.button_delete.setOnClickListener { v -> mDownloadManager?.deleteTask(bean) }
 
-            holder.button_start.setOnClickListener { v -> mDownloadManager?.down(bean) }
+            holder.button_start.setOnClickListener { v -> mDownloadManager?.addTask(bean) }
 
             holder.text_name.text = bean.appName
             holder.text_range.text = bean.isSupportRange.toString()
@@ -170,7 +165,8 @@ class ListViewActivity : AppCompatActivity(), Observer {
             val contentView: View
             if (convertView == null) {
 //                contentView = LinearLayout.inflate(parent.context, R.layout.item_down, null)
-                contentView = LayoutInflater.from(parent.context).inflate(R.layout.item_down, parent, false)
+                contentView =
+                    LayoutInflater.from(parent.context).inflate(R.layout.item_down, parent, false)
                 viewHolder = ViewHolder(contentView)
                 contentView.tag = viewHolder
             } else {
@@ -182,23 +178,23 @@ class ListViewActivity : AppCompatActivity(), Observer {
             viewHolder.text_name.text = bean.appName
 
             when (bean.downloadState) {
-                DownLoadState.STATE_NONE -> viewHolder.button_start.text = "点击下载"
-                DownLoadState.STATE_WAITING -> viewHolder.button_start.text = "等待下载"
+                DownLoadState.STATE_NONE.index -> viewHolder.button_start.text = "点击下载"
+                DownLoadState.STATE_WAITING.index -> viewHolder.button_start.text = "等待下载"
                 // 下载中 改成 正在下载
-                DownLoadState.STATE_DOWNLOADING -> viewHolder.button_start.text = "正在下载"
+                DownLoadState.STATE_DOWNLOADING.index -> viewHolder.button_start.text = "正在下载"
                 // 暂停下载 换成 继续下载
-                DownLoadState.STATE_PAUSED -> viewHolder.button_start.text = "继续下载"
-                DownLoadState.STATE_DOWNLOADED -> viewHolder.button_start.text = "下载完毕"
-                DownLoadState.STATE_ERROR -> viewHolder.button_start.text = "下载错误"
-                DownLoadState.STATE_CONNECTION -> viewHolder.button_start.text = "连接中"
+                DownLoadState.STATE_PAUSED.index -> viewHolder.button_start.text = "继续下载"
+                DownLoadState.STATE_DOWNLOADED.index -> viewHolder.button_start.text = "下载完毕"
+                DownLoadState.STATE_ERROR.index -> viewHolder.button_start.text = "下载错误"
+                DownLoadState.STATE_CONNECTION.index -> viewHolder.button_start.text = "连接中"
             }
 
             viewHolder.button_delete.setOnClickListener { v ->
-                mDownloadManager?.delete(bean)
+                mDownloadManager?.deleteTask(bean)
             }
 
             viewHolder.button_start.setOnClickListener { v ->
-                mDownloadManager?.down(bean)
+                mDownloadManager?.addTask(bean)
             }
             viewHolder.text_range.text = bean.isSupportRange.toString()
             viewHolder.text_progress.text =
@@ -213,8 +209,8 @@ class ListViewActivity : AppCompatActivity(), Observer {
     }
 
     //    private class ViewHolder internal constructor(itemView: View) {
-    private class ViewHolder internal constructor(override val containerView: View) :
-        LayoutContainer {
+    private class ViewHolder
+    internal constructor(override val containerView: View) : LayoutContainer {
 
 //        internal var text_name: TextView = itemView.findViewById<View>(R.id.text_name) as TextView
 //        internal var button_start: Button = itemView.findViewById<View>(R.id.button_start) as Button

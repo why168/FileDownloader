@@ -17,7 +17,7 @@ public class DownLoadBean implements Serializable, Cloneable {
     public String appIcon;//app的图片
     public long totalSize;//app的size
     public long currentSize = 0;//当前的size
-    public int downloadState = DownLoadState.STATE_NONE;//下载的状态
+    public int downloadState = DownLoadState.STATE_NONE.getIndex();//下载的状态
     public String url;//下载地址
     public String path;//保存路径
     public boolean isSupportRange = false;//是否支持断点下载

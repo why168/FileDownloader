@@ -15,7 +15,10 @@ import java.util.concurrent.TimeUnit;
 public class DownLoadExecutors extends ThreadPoolExecutor {
 
     DownLoadExecutors() {
-        super(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), threadFactory("downLoad executors"));
+        super(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<>(),
+                threadFactory("downLoad executors"),
+                new AbortPolicy());
+
         allowCoreThreadTimeOut(true);
     }
 
