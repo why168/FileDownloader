@@ -2,6 +2,7 @@ package com.github.why168.multifiledownloader
 
 import android.content.Context
 import android.content.Intent
+import com.github.why168.multifiledownloader.call.AsyncConnectCall
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
 
@@ -48,26 +49,15 @@ class DownloadManager {
         DownLoadService.deleteTask(context, item)
     }
 
+    fun stopAll() {
+        DownLoadService.mWaitingQueue.clear()
 
+        DownLoadService.connectionTaskMap.forEach {
+            it.value.cancel()
+        }
 
-    fun down(item: DownLoadBean) {
-        val intent = Intent(context, DownLoadService::class.java)
-        intent.action = Constants.action
-        intent.setPackage(Constants.packageName)
-        intent.putExtra(Constants.KEY_DOWNLOAD_ENTRY, item)
-        intent.putExtra(Constants.KEY_OPERATING_STATE, false)
-        context?.startService(intent)
+        DownLoadService.downTaskMap.forEach {
+            it.value.cancel()
+        }
     }
-
-    fun delete(item: DownLoadBean) {
-        val intent = Intent(context, DownLoadService::class.java)
-        intent.action = Constants.action
-        intent.setPackage(Constants.packageName)
-        intent.putExtra(Constants.KEY_DOWNLOAD_ENTRY, item)
-        intent.putExtra(Constants.KEY_OPERATING_STATE, true)
-        context?.startService(intent)
-    }
-
-
-
 }

@@ -1,4 +1,4 @@
-package com.github.why168.multifiledownloader;
+package com.github.why168.multifiledownloader.call;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -6,6 +6,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.github.why168.multifiledownloader.Constants;
+import com.github.why168.multifiledownloader.DownLoadBean;
+import com.github.why168.multifiledownloader.DownLoadState;
 import com.github.why168.multifiledownloader.db.DataBaseUtil;
 
 import java.io.IOException;

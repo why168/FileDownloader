@@ -1,4 +1,4 @@
-package com.github.why168.multifiledownloader;
+package com.github.why168.multifiledownloader.call;
 
 
 import android.os.Process;
@@ -12,7 +12,7 @@ import java.util.Locale;
  * @version 2017/6/13 16:15
  * @since JDK1.8
  */
-abstract class NickRunnable implements Runnable {
+public abstract class NickRunnable implements Runnable {
     protected final String name;
 
     NickRunnable(String format, Object... args) {

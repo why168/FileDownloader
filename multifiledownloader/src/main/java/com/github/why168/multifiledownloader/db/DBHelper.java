@@ -65,6 +65,11 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(sql);
     }
 
+    public static void clearTable(Context context) {
+        DBHelper.getInstance(context).execSQL("delete from " + Constants.TABLE_DOWN); // 清空数据
+//        DBHelper.getInstance(context).execSQL("update sqlite_sequence SET seq = 0 where name = " + Constants.TABLE_DOWN); //自增长ID为0
+    }
+
 
     /**
      * 查询数据库的指定表中的指定数据.

@@ -9,6 +9,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.github.why168.multifiledownloader.call.AsyncConnectCall;
+import com.github.why168.multifiledownloader.call.AsyncDownCall;
 import com.github.why168.multifiledownloader.db.DataBaseUtil;
 import com.github.why168.multifiledownloader.notify.DownLoadObservable;
 import com.github.why168.multifiledownloader.utlis.DownLoadConfig;
@@ -17,15 +19,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static com.github.why168.multifiledownloader.DownLoadState.STATE_DELETE;
-import static com.github.why168.multifiledownloader.DownLoadState.STATE_DOWNLOADED;
 
 public class DownLoadService extends Service {
 
     private final String TAG = DownLoadService.this.getClass().getName();
     private final static DownLoadExecutors downLoadExecutor = new DownLoadExecutors();
-    private final static ConcurrentHashMap<String, AsyncConnectCall> connectionTaskMap = new ConcurrentHashMap<>();
-    private final static ConcurrentHashMap<String, AsyncDownCall> downTaskMap = new ConcurrentHashMap<>();
-    private final static LinkedBlockingDeque<DownLoadBean> mWaitingQueue = new LinkedBlockingDeque<>(); // 等待队列
+    public final static ConcurrentHashMap<String, AsyncConnectCall> connectionTaskMap = new ConcurrentHashMap<>();
+    public final static ConcurrentHashMap<String, AsyncDownCall> downTaskMap = new ConcurrentHashMap<>();
+    public final static LinkedBlockingDeque<DownLoadBean> mWaitingQueue = new LinkedBlockingDeque<>(); // 等待队列
 
     /**
      * 当下载状态发送改变的时候回调

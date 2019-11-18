@@ -1,4 +1,4 @@
-package com.github.why168.multifiledownloader;
+package com.github.why168.multifiledownloader.call;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -6,6 +6,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.github.why168.multifiledownloader.Constants;
+import com.github.why168.multifiledownloader.DownLoadBean;
+import com.github.why168.multifiledownloader.DownLoadState;
 import com.github.why168.multifiledownloader.db.DataBaseUtil;
 import com.github.why168.multifiledownloader.utlis.FileUtilities;
 
@@ -50,7 +53,7 @@ public class AsyncDownCall extends NickRunnable {
         FileOutputStream fos = null;
         InputStream is = null;
 
-        File destFile = FileUtilities.getDownloadFile(bean.url);
+        File destFile = FileUtilities.INSTANCE.getDownloadFile(bean.url);
         bean.path = destFile.getPath();
         HttpURLConnection connection = null;
         bean.downloadState = DownLoadState.STATE_DOWNLOADING.getIndex();

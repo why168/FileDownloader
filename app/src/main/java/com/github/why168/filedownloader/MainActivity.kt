@@ -11,6 +11,15 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Toast
+import com.github.why168.multifiledownloader.Constants
+import com.github.why168.multifiledownloader.DownloadManager
+import com.github.why168.multifiledownloader.db.DBHelper
+import com.github.why168.multifiledownloader.notify.DownLoadObservable
+import com.github.why168.multifiledownloader.utlis.FileUtilities
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 
 
@@ -73,6 +82,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun resetData(view: View) {
-        Toast.makeText(this, "待开发", Toast.LENGTH_LONG).show()
+        DownloadManager.getInstance(this)?.stopAll()
+        FileUtilities.clearFileDownloader()
+        DBHelper.clearTable(this)
+        Toast.makeText(this, "reset successful！", Toast.LENGTH_SHORT).show()
     }
 }
