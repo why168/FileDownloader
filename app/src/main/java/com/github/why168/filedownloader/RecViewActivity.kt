@@ -112,16 +112,27 @@ class RecViewActivity : AppCompatActivity(), Observer {
         val holder = getViewHolder(index)
 
         when (bean.downloadState) {
-            DownLoadState.STATE_NONE.index -> holder.button_start.text = "点击下载"
-            // 等待下载 改成 排队下载
-            DownLoadState.STATE_WAITING.index -> holder.button_start.text = "排队下载"
-            // 下载中 改成 正在下载
-            DownLoadState.STATE_DOWNLOADING.index -> holder.button_start.text = "正在下载"
-            // 暂停下载 换成 继续下载
-            DownLoadState.STATE_PAUSED.index -> holder.button_start.text = "继续下载"
-            DownLoadState.STATE_DOWNLOADED.index -> holder.button_start.text = "下载完毕"
-            DownLoadState.STATE_ERROR.index -> holder.button_start.text = "下载错误"
-            DownLoadState.STATE_CONNECTION.index -> holder.button_start.text = "连接中"
+            DownLoadState.STATE_NONE.index -> {
+                holder.button_start.text = DownLoadState.STATE_NONE.content
+            }
+            DownLoadState.STATE_WAITING.index -> {
+                holder.button_start.text = DownLoadState.STATE_WAITING.content
+            }
+            DownLoadState.STATE_DOWNLOADING.index -> {
+                holder.button_start.text = DownLoadState.STATE_DOWNLOADING.content
+            }
+            DownLoadState.STATE_PAUSED.index -> {
+                holder.button_start.text = DownLoadState.STATE_PAUSED.content
+            }
+            DownLoadState.STATE_DOWNLOADED.index -> {
+                holder.button_start.text = DownLoadState.STATE_DOWNLOADED.content
+            }
+            DownLoadState.STATE_ERROR.index -> {
+                holder.button_start.text = DownLoadState.STATE_ERROR.content
+            }
+            DownLoadState.STATE_CONNECTION.index -> {
+                holder.button_start.text = DownLoadState.STATE_CONNECTION.content
+            }
         }
 
         holder.button_delete.setOnClickListener {
@@ -152,10 +163,17 @@ class RecViewActivity : AppCompatActivity(), Observer {
         DownLoadObservable.getInstance().deleteObserver(this)
     }
 
+    @SuppressLint("SetTextI18n")
     private inner class ViewAdapter : RecyclerView.Adapter<ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_down, parent, false))
+            return ViewHolder(
+                LayoutInflater.from(parent.context).inflate(
+                    R.layout.item_down,
+                    parent,
+                    false
+                )
+            )
         }
 
         override fun getItemId(position: Int): Long {
@@ -167,15 +185,27 @@ class RecViewActivity : AppCompatActivity(), Observer {
             holder.text_name.text = bean.appName
 
             when (bean.downloadState) {
-                DownLoadState.STATE_NONE.index -> holder.button_start.text = "点击下载"
-                DownLoadState.STATE_WAITING.index -> holder.button_start.text = "等待下载"
-                // 下载中 改成 正在下载
-                DownLoadState.STATE_DOWNLOADING.index -> holder.button_start.text = "正在下载"
-                // 暂停下载 换成 继续下载
-                DownLoadState.STATE_PAUSED.index -> holder.button_start.text = "继续下载"
-                DownLoadState.STATE_DOWNLOADED.index -> holder.button_start.text = "下载完毕"
-                DownLoadState.STATE_ERROR.index -> holder.button_start.text = "下载错误"
-                DownLoadState.STATE_CONNECTION.index -> holder.button_start.text = "连接中"
+                DownLoadState.STATE_NONE.index -> {
+                    holder.button_start.text = DownLoadState.STATE_NONE.content
+                }
+                DownLoadState.STATE_WAITING.index -> {
+                    holder.button_start.text = DownLoadState.STATE_WAITING.content
+                }
+                DownLoadState.STATE_DOWNLOADING.index -> {
+                    holder.button_start.text = DownLoadState.STATE_DOWNLOADING.content
+                }
+                DownLoadState.STATE_PAUSED.index -> {
+                    holder.button_start.text = DownLoadState.STATE_PAUSED.content
+                }
+                DownLoadState.STATE_DOWNLOADED.index -> {
+                    holder.button_start.text = DownLoadState.STATE_DOWNLOADED.content
+                }
+                DownLoadState.STATE_ERROR.index -> {
+                    holder.button_start.text = DownLoadState.STATE_ERROR.content
+                }
+                DownLoadState.STATE_CONNECTION.index -> {
+                    holder.button_start.text = DownLoadState.STATE_CONNECTION.content
+                }
             }
 
             holder.button_delete.setOnClickListener {
@@ -201,15 +231,7 @@ class RecViewActivity : AppCompatActivity(), Observer {
     }
 
     internal class ViewHolder(override val containerView: View) :
-        RecyclerView.ViewHolder(containerView), LayoutContainer {
-
-//        var text_name: TextView = itemView.findViewById(R.id.text_name)
-//        var button_start: Button = itemView.findViewById(R.id.button_start)
-//        var button_delete: Button = itemView.findViewById(R.id.button_delete)
-//        var text_progress: TextView = itemView.findViewById(R.id.text_progress)
-//        var progressBar: ProgressBar = itemView.findViewById(R.id.progressBar)
-//        var text_range: TextView = itemView.findViewById(R.id.text_range)
-    }
+        RecyclerView.ViewHolder(containerView), LayoutContainer
 
     private fun getViewHolder(position: Int): ViewHolder {
         return recView.findViewHolderForLayoutPosition(position) as ViewHolder
@@ -220,6 +242,5 @@ class RecViewActivity : AppCompatActivity(), Observer {
         val first = layoutManager!!.findFirstVisibleItemPosition()
         val last = layoutManager.findLastVisibleItemPosition()
         return position in first..last
-//        return first <= position && position <= last
     }
 }

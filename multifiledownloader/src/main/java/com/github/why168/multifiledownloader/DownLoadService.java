@@ -26,7 +26,7 @@ public class DownLoadService extends Service {
     private final static DownLoadExecutors downLoadExecutor = new DownLoadExecutors();
     public final static ConcurrentHashMap<String, AsyncConnectCall> connectionTaskMap = new ConcurrentHashMap<>();
     public final static ConcurrentHashMap<String, AsyncDownCall> downTaskMap = new ConcurrentHashMap<>();
-    public final static LinkedBlockingDeque<DownLoadBean> mWaitingQueue = new LinkedBlockingDeque<>(); // 等待队列
+    public final static LinkedBlockingDeque<DownLoadBean> waitingQueue = new LinkedBlockingDeque<>(); // 等待队列
 
     /**
      * 当下载状态发送改变的时候回调
@@ -52,28 +52,6 @@ public class DownLoadService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
-//        try {
-//            if (intent.getAction() != null && Constants.action.equalsIgnoreCase(intent.getAction())) {
-//                // 执行
-//                DownLoadBean bean = (DownLoadBean) intent.getSerializableExtra(Constants.KEY_DOWNLOAD_ENTRY);
-//                if (bean != null) {
-//                    boolean booleanExtra = intent.getBooleanExtra(Constants.KEY_OPERATING_STATE, false);
-//                    if (booleanExtra) {
-//                        // 删除下载
-//                        deleteTask(bean);
-//                    } else {
-//                        // 开始下载
-//                        addTask(bean);
-//                    }
-//                }
-//                return START_STICKY;
-//            } else {
-//                return super.onStartCommand(intent, flags, startId);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return super.onStartCommand(intent, flags, startId);
-//        }
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -101,12 +79,20 @@ public class DownLoadService extends Service {
         handler.sendMessage(message);
 
         if (state == DownLoadState.STATE_ERROR.getIndex()
+                || state == DownLoadState.STATE_DOWNLOADING.getIndex()
                 || state == DownLoadState.STATE_DOWNLOADED.getIndex()
                 || state == DownLoadState.STATE_DELETE.getIndex()
                 || state == DownLoadState.STATE_PAUSED.getIndex()) {
-            Log.d("Edwin", "notifyDownloadStateChanged---> " + bean.toString());
-            downTaskMap.remove(bean.id);
-            DownLoadBean poll = mWaitingQueue.poll();
+            Log.d("Edwin", String.format("notifyDownloadStateChanged---> id = %s , state = %d", bean.id, bean.downloadState));
+            AsyncDownCall downLoadTask = downTaskMap.get(bean.id);
+            if (downLoadTask != null) {
+                downLoadTask.cancel();
+                downTaskMap.remove(bean.id);
+            } else {
+                waitingQueue.remove(bean);
+            }
+
+            DownLoadBean poll = waitingQueue.poll();
             if (poll != null) {
                 downNone(context, poll);
             }
@@ -155,7 +141,7 @@ public class DownLoadService extends Service {
     public static void deleteTask(Context context, DownLoadBean item) {
         // 删除文件，删除数据库
         try {
-            mWaitingQueue.remove(item);
+            waitingQueue.remove(item);
             AsyncDownCall downLoadTask = downTaskMap.get(item.id);
             if (downLoadTask != null) {
                 downLoadTask.cancel();
@@ -172,7 +158,7 @@ public class DownLoadService extends Service {
     private static void downNone(Context context, DownLoadBean loadBean) {
         // 最最最--->先判断任务数是否
         if (downTaskMap.size() >= DownLoadConfig.getConfig().getMaxTasks()) {
-            mWaitingQueue.offer(loadBean);
+            waitingQueue.offer(loadBean);
             loadBean.downloadState = DownLoadState.STATE_WAITING.getIndex();
             // 更新数据库
             DataBaseUtil.UpdateDownLoadById(context, loadBean);
@@ -195,8 +181,8 @@ public class DownLoadService extends Service {
      */
     private static void downWaiting(Context context, DownLoadBean loadBean) {
         // 1.移出去队列
-        mWaitingQueue.remove(loadBean);
-        Log.d("Edwin", "mWaitingQueue size = " + mWaitingQueue.size());
+        waitingQueue.remove(loadBean);
+        Log.d("Edwin", "waitingQueue size = " + waitingQueue.size());
 
         // 2.TaskMap获取线程对象，移除线程;
         AsyncDownCall downLoadTask = downTaskMap.get(loadBean.id);
@@ -226,24 +212,10 @@ public class DownLoadService extends Service {
 
 
     /**
-     * 下载状态
+     * 下载中
      */
     private static void downLoading(Context context, DownLoadBean loadBean) {
-        // 1.TaskMap获取线程对象，移除线程;
-        AsyncDownCall downLoadTask = downTaskMap.get(loadBean.id);
-        if (downLoadTask != null) {
-            downLoadTask.cancel();
-            downTaskMap.remove(loadBean.id);
-        } else {
-            mWaitingQueue.remove(loadBean);
-        }
-        //TODO 执行下载队列中的任务
-//        notifyDownloadStateChanged(c,);
-
-        DownLoadBean poll = mWaitingQueue.poll();
-        if (poll != null) {
-            downNone(context, poll);
-        }
+        notifyDownloadStateChanged(context, loadBean, DownLoadState.STATE_DOWNLOADING.getIndex());
     }
 
     /**

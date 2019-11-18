@@ -2,9 +2,7 @@ package com.github.why168.multifiledownloader
 
 import android.content.Context
 import android.content.Intent
-import com.github.why168.multifiledownloader.call.AsyncConnectCall
 import java.lang.ref.SoftReference
-import java.lang.ref.WeakReference
 
 /**
  * DownloadManager
@@ -50,7 +48,7 @@ class DownloadManager {
     }
 
     fun stopAll() {
-        DownLoadService.mWaitingQueue.clear()
+        DownLoadService.waitingQueue.clear()
 
         DownLoadService.connectionTaskMap.forEach {
             it.value.cancel()
