@@ -17,7 +17,7 @@ class BaseApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         // 初始化DownLoad
-        DownLoadConfig.getConfig().maxTasks = 3
+        DownLoadConfig.setMaxTasks(3)
     }
 
 }

@@ -40,11 +40,15 @@ class DownloadManager {
     }
 
     fun addTask(item: DownLoadBean) {
-        DownLoadService.addTask(context, item)
+        context?.let {
+            DownLoadService.addTask(it, item)
+        }
     }
 
     fun deleteTask(item: DownLoadBean) {
-        DownLoadService.deleteTask(context, item)
+        context?.let {
+            DownLoadService.deleteTask(it, item)
+        }
     }
 
     fun stopAll() {

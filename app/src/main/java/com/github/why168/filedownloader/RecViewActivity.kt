@@ -155,12 +155,12 @@ class RecViewActivity : AppCompatActivity(), Observer {
 
     override fun onStart() {
         super.onStart()
-        DownLoadObservable.getInstance().addObserver(this)
+        DownLoadObservable.addObserver(this)
     }
 
     override fun onStop() {
         super.onStop()
-        DownLoadObservable.getInstance().deleteObserver(this)
+        DownLoadObservable.deleteObserver(this)
     }
 
     @SuppressLint("SetTextI18n")

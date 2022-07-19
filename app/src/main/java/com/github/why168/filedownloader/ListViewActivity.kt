@@ -98,12 +98,13 @@ class ListViewActivity : AppCompatActivity(), Observer {
 
     override fun onStart() {
         super.onStart()
-        DownLoadObservable.getInstance().addObserver(this)
+        DownLoadObservable.addObserver(this)
     }
 
     override fun onStop() {
         super.onStop()
-        DownLoadObservable.getInstance().deleteObserver(this)
+        DownLoadObservable.deleteObserver(this)
+        DownLoadObservable.deleteObserver(this)
     }
 
     private fun updateItem(position: Int, bean: DownLoadBean) {
